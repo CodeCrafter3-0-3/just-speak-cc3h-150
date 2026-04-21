@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Sessions — Just-Speak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Lora:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --mint:#3a9e72; --mint-lt:#d8f0e6; --mint-mid:#8ecfad; --mint-dk:#2a7a58;
+  --sky:#4a9abf;  --sky-lt:#dff0f7;
+  --cream:#f7faf8; --sage:#edf4f0;
+  --white:#ffffff;
+  --ink:#172920;  --ink-2:#3a5246; --muted:#6b8c7a;
+  --border:rgba(58,158,114,0.16); --border-2:rgba(58,158,114,0.28);
+  --shadow:0 2px 14px rgba(23,41,32,0.07); --shadow-lg:0 10px 40px rgba(23,41,32,0.13);
+  --font-serif:'Lora',Georgia,serif; --font-body:'DM Sans',sans-serif;
+  --ease:cubic-bezier(0.25,0.46,0.45,0.94);
+  --sidebar-w:240px; --header-h:66px; --r:14px; --rs:9px;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--cream);color:var(--ink);line-height:1.6;min-height:100vh}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--mint-mid);border-radius:99px}
+
+/* ── APP SHELL ── */
+.app{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:1.6rem 1.1rem;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sidebar-logo{display:flex;align-items:center;gap:8px;font-family:var(--font-serif);font-size:1.1rem;color:var(--ink);text-decoration:none;margin-bottom:2.2rem}
+.logo-dot{width:9px;height:9px;background:var(--mint);border-radius:50%;animation:breathe 3s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.65}}
+
+.nav-group-label{font-size:.65rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:1.2rem 0 .5rem .4rem}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:10px 11px;border-radius:10px;
+  text-decoration:none;font-size:.855rem;font-weight:400;color:var(--muted);
+  transition:background .2s,color .2s;margin-bottom:2px;cursor:pointer;
+  border:none;background:transparent;width:100%;text-align:left;font-family:var(--font-body)
+}
+.nav-item:hover{background:var(--sage);color:var(--ink-2)}
+.nav-item.active{background:var(--mint-lt);color:var(--mint);font-weight:500}
+.nav-icon{font-size:.95rem;width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--mint);color:#fff;font-size:.62rem;font-weight:500;padding:2px 7px;border-radius:20px}
+
+.sidebar-footer{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;cursor:pointer;transition:background .2s}
+.user-chip:hover{background:var(--sage)}
+.user-av{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,var(--mint-mid),#b8ddf0);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:500;color:var(--ink);flex-shrink:0}
+.user-name{font-size:.8rem;font-weight:500;color:var(--ink)}
+.user-role{font-size:.7rem;color:var(--muted)}
+
+/* ── MAIN ── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+
+/* topbar */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  height:var(--header-h);
+  background:rgba(247,250,248,.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 2rem;gap:1rem
+}
+.topbar-title{font-family:var(--font-serif);font-size:1.2rem;font-weight:500;color:var(--ink)}
+.topbar-right{display:flex;align-items:center;gap:9px;margin-left:auto}
+.top-icon-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border-2);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;color:var(--muted);transition:background .2s,color .2s}
+.top-icon-btn:hover{background:var(--mint-lt);color:var(--mint)}
+
+/* ── PAGE CONTENT ── */
+.page-content{padding:2.25rem 2.25rem 4rem;max-width:1100px}
+
+/* tabs */
+.tab-row{display:flex;background:var(--sage);border-radius:50px;padding:4px;margin-bottom:2rem;position:relative;width:fit-content}
+.tab-slider{position:absolute;top:4px;left:4px;height:calc(100% - 8px);background:var(--white);border-radius:50px;box-shadow:0 2px 8px rgba(58,158,114,.12);transition:all .3s var(--ease)}
+.tab-btn{padding:9px 22px;background:transparent;border:none;border-radius:50px;font-family:var(--font-body);font-size:.855rem;font-weight:500;color:var(--muted);cursor:pointer;position:relative;z-index:1;transition:color .3s var(--ease);white-space:nowrap}
+.tab-btn.active{color:var(--ink)}
+
+/* ── EMPTY STATE ── */
+.empty-hero{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:3.5rem 2rem;
+  background:var(--white);border:1px solid var(--border);border-radius:20px;
+  box-shadow:var(--shadow);
+  animation:fadeUp .5s var(--ease) both
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+.empty-illustration{
+  width:160px;height:160px;
+  background:linear-gradient(145deg,var(--mint-lt),var(--sky-lt));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:4rem;margin-bottom:1.75rem;
+  animation:float 4s ease-in-out infinite
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.empty-title{font-family:var(--font-serif);font-size:1.55rem;font-weight:500;color:var(--ink);margin-bottom:.55rem;line-height:1.3}
+.empty-title em{font-style:italic;color:var(--mint)}
+.empty-sub{font-size:.9rem;color:var(--muted);font-weight:300;max-width:42ch;line-height:1.75;margin-bottom:2rem}
+
+.steps-row{display:flex;gap:0;margin-bottom:2.5rem;width:100%;max-width:520px}
+.step-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:18px;left:calc(50% + 18px);right:calc(-50% + 18px);height:2px;background:linear-gradient(to right,var(--mint-mid),var(--border));z-index:0}
+.step-circle{width:36px;height:36px;border-radius:50%;background:var(--mint-lt);border:2px solid var(--mint-mid);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:500;color:var(--mint);position:relative;z-index:1;transition:all .3s}
+.step-label{font-size:.72rem;color:var(--muted);text-align:center;line-height:1.4;font-weight:400}
+
+.btn-book-first{
+  display:flex;align-items:center;gap:10px;
+  padding:15px 32px;background:var(--mint);color:#fff;
+  border:none;border-radius:50px;
+  font-family:var(--font-body);font-size:.95rem;font-weight:500;
+  cursor:pointer;
+  box-shadow:0 6px 24px rgba(58,158,114,.3);
+  transition:background .25s,transform .2s,box-shadow .25s;
+  letter-spacing:.01em
+}
+.btn-book-first:hover{background:var(--mint-dk);transform:translateY(-2px);box-shadow:0 10px 32px rgba(58,158,114,.38)}
+.btn-book-first:active{transform:scale(.98)}
+
+.or-text{font-size:.8rem;color:var(--muted);margin:1rem 0}
+.btn-browse{padding:12px 26px;border:1.5px solid var(--border-2);border-radius:50px;background:var(--white);font-family:var(--font-body);font-size:.875rem;font-weight:400;color:var(--ink-2);cursor:pointer;transition:background .2s,border-color .2s}
+.btn-browse:hover{background:var(--sage);border-color:var(--mint-mid)}
+
+/* ── BOOKING WIZARD ── */
+.wizard{display:none;animation:fadeUp .4s var(--ease) both}
+.wizard.visible{display:block}
+
+/* wizard progress */
+.wiz-progress{display:flex;align-items:center;gap:0;margin-bottom:2rem}
+.wiz-step{display:flex;align-items:center;gap:8px;flex:1}
+.wiz-step:last-child{flex:0}
+.wiz-num{width:30px;height:30px;border-radius:50%;border:2px solid var(--border-2);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:500;color:var(--muted);transition:all .3s var(--ease);flex-shrink:0}
+.wiz-step.done .wiz-num{background:var(--mint);border-color:var(--mint);color:#fff}
+.wiz-step.active .wiz-num{background:var(--mint-lt);border-color:var(--mint);color:var(--mint)}
+.wiz-step-label{font-size:.75rem;color:var(--muted);transition:color .3s}
+.wiz-step.active .wiz-step-label{color:var(--ink);font-weight:500}
+.wiz-step.done .wiz-step-label{color:var(--mint)}
+.wiz-line{flex:1;height:2px;background:var(--border);margin:0 6px;border-radius:99px;transition:background .4s var(--ease);position:relative;overflow:hidden}
+.wiz-line::after{content:'';position:absolute;inset:0;background:var(--mint);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
+.wiz-line.filled::after{transform:scaleX(1)}
+
+/* wizard panels */
+.wiz-panel{display:none}
+.wiz-panel.active{display:block}
+
+/* panel card */
+.panel-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:2rem;box-shadow:var(--shadow);margin-bottom:1.25rem}
+.panel-heading{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--ink);margin-bottom:.35rem}
+.panel-sub{font-size:.85rem;color:var(--muted);font-weight:300;margin-bottom:1.5rem}
+
+/* therapist pick cards */
+.therapist-pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pick-card{
+  border:2px solid var(--border);border-radius:var(--r);padding:1.1rem;
+  background:var(--white);cursor:pointer;
+  transition:border-color .2s,background .2s,transform .2s;
+  position:relative
+}
+.pick-card:hover{border-color:var(--mint-mid);background:var(--sage);transform:translateY(-2px)}
+.pick-card.selected{border-color:var(--mint);background:var(--mint-lt)}
+.pick-card.selected::after{content:'✓';position:absolute;top:10px;right:12px;width:22px;height:22px;border-radius:50%;background:var(--mint);color:#fff;font-size:.7rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+.pick-av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--mint-mid),#b8ddf0);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:.7rem}
+.pick-name{font-size:.875rem;font-weight:500;color:var(--ink);margin-bottom:2px}
+.pick-qual{font-size:.72rem;color:var(--muted);margin-bottom:.55rem;font-weight:300}
+.pick-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.6rem}
+.pick-tag{font-size:.62rem;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--mint-lt);color:var(--mint)}
+.pick-meta{display:flex;gap:10px}
+.pick-meta-item{font-size:.72rem;color:var(--muted)}
+.pick-meta-item strong{color:var(--ink-2);font-weight:500}
+.pick-stars{color:#f5a623;font-size:.72rem}
+
+/* session type */
+.session-type-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.type-card{border:2px solid var(--border);border-radius:var(--r);padding:1.2rem;cursor:pointer;transition:all .2s var(--ease);text-align:center;background:var(--white)}
+.type-card:hover{border-color:var(--mint-mid);background:var(--sage)}
+.type-card.selected{border-color:var(--mint);background:var(--mint-lt)}
+.type-icon{font-size:1.8rem;display:block;margin-bottom:.6rem}
+.type-name{font-size:.875rem;font-weight:500;color:var(--ink);margin-bottom:4px}
+.type-desc{font-size:.72rem;color:var(--muted);font-weight:300;line-height:1.5}
+
+/* calendar */
+.cal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cal-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-month{font-family:var(--font-serif);font-size:.95rem;font-weight:500;color:var(--ink)}
+.cal-nav{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border-2);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted);transition:background .2s,color .2s}
+.cal-nav:hover{background:var(--mint-lt);color:var(--mint);border-color:var(--mint-mid)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-label{font-size:.63rem;font-weight:500;text-align:center;color:var(--muted);padding:4px 0;letter-spacing:.05em}
+.cal-day{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-size:.78rem;cursor:pointer;
+  transition:all .18s var(--ease);color:var(--ink-2)
+}
+.cal-day.empty{pointer-events:none;color:transparent}
+.cal-day.past{color:#ccc;pointer-events:none}
+.cal-day.available:hover{background:var(--mint-lt);color:var(--mint)}
+.cal-day.selected{background:var(--mint);color:#fff;font-weight:500}
+.cal-day.today{border:1.5px solid var(--mint-mid)}
+.cal-day.unavailable{color:#ddd;pointer-events:none}
+
+/* time slots */
+.time-section-label{font-size:.72rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:.85rem 0 .45rem}
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.slot{
+  padding:9px 6px;border:1.5px solid var(--border-2);border-radius:var(--rs);
+  font-size:.78rem;font-weight:500;color:var(--ink-2);text-align:center;
+  cursor:pointer;background:var(--white);
+  transition:all .18s var(--ease)
+}
+.slot:hover{border-color:var(--mint-mid);background:var(--sage);color:var(--mint)}
+.slot.selected{border-color:var(--mint);background:var(--mint-lt);color:var(--mint)}
+.slot.booked{border-color:var(--border);color:#bbb;pointer-events:none;background:var(--sage)}
+
+/* concern selector */
+.concern-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.concern-chip{
+  padding:9px 14px;border:1.5px solid var(--border-2);border-radius:50px;
+  font-size:.78rem;font-weight:400;color:var(--muted);
+  cursor:pointer;text-align:center;background:var(--white);
+  transition:all .18s var(--ease)
+}
+.concern-chip:hover{border-color:var(--mint-mid);background:var(--sage);color:var(--ink)}
+.concern-chip.selected{border-color:var(--mint);background:var(--mint-lt);color:var(--mint);font-weight:500}
+
+.notes-area{width:100%;padding:12px 14px;border:1.5px solid var(--border-2);border-radius:var(--rs);font-family:var(--font-body);font-size:.875rem;color:var(--ink);background:var(--cream);resize:vertical;min-height:90px;outline:none;transition:border-color .2s,box-shadow .2s;margin-top:.75rem}
+.notes-area:focus{border-color:var(--mint);box-shadow:0 0 0 3px rgba(58,158,114,.08);background:var(--white)}
+.notes-area::placeholder{color:#a0bcac}
+
+/* review card */
+.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.25rem}
+.review-block{background:var(--sage);border-radius:var(--rs);padding:1rem 1.1rem}
+.review-label{font-size:.65rem;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px}
+.review-val{font-size:.9rem;font-weight:500;color:var(--ink)}
+.review-val small{font-size:.75rem;color:var(--muted);font-weight:300}
+
+.price-summary{border:1px solid var(--border-2);border-radius:var(--r);overflow:hidden;margin-bottom:1.5rem}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:.85rem;border-bottom:1px solid var(--border)}
+.price-row:last-child{border-bottom:none;background:var(--mint-lt)}
+.price-row span:first-child{color:var(--muted)}
+.price-row span:last-child{font-weight:500;color:var(--ink)}
+.price-row.total span{color:var(--mint);font-size:1rem}
+
+/* wizard nav buttons */
+.wiz-nav{display:flex;align-items:center;justify-content:space-between;margin-top:.5rem}
+.btn-back{padding:11px 22px;border:1.5px solid var(--border-2);border-radius:50px;background:var(--white);font-family:var(--font-body);font-size:.855rem;font-weight:500;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s;text-decoration:none}
+.btn-back:hover{background:var(--sage)}
+.btn-next{padding:11px 28px;background:var(--mint);color:#fff;border:none;border-radius:50px;font-family:var(--font-body);font-size:.855rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 4px 16px rgba(58,158,114,.25);transition:background .25s,transform .2s}
+.btn-next:hover{background:var(--mint-dk);transform:translateY(-1px)}
+.btn-next:disabled{background:#b8d4c8;pointer-events:none;box-shadow:none}
+
+/* ── CONFIRMATION ── */
+.confirm-screen{display:none;animation:fadeUp .5s var(--ease) both}
+.confirm-screen.visible{display:flex;flex-direction:column;align-items:center;text-align:center;padding:3rem 1.5rem}
+
+.confirm-anim{
+  width:90px;height:90px;border-radius:50%;
+  background:var(--mint-lt);
+  border:3px solid var(--mint);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;margin-bottom:1.5rem;
+  animation:popIn .6s var(--ease) both
+}
+@keyframes popIn{0%{transform:scale(0);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+
+.confirm-title{font-family:var(--font-serif);font-size:1.65rem;font-weight:500;color:var(--ink);margin-bottom:.5rem;line-height:1.25}
+.confirm-title em{font-style:italic;color:var(--mint)}
+.confirm-sub-text{font-size:.9rem;color:var(--muted);font-weight:300;max-width:44ch;margin-bottom:2rem;line-height:1.75}
+
+.confirm-detail-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.4rem 1.75rem;width:100%;max-width:440px;margin-bottom:1.75rem;box-shadow:var(--shadow);text-align:left}
+.confirm-therapist-row{display:flex;align-items:center;gap:13px;margin-bottom:1.1rem;padding-bottom:1.1rem;border-bottom:1px solid var(--border)}
+.confirm-av{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--mint-mid),#b8ddf0);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.confirm-info-name{font-size:.9rem;font-weight:500;color:var(--ink)}
+.confirm-info-qual{font-size:.72rem;color:var(--muted);font-weight:300}
+.confirm-detail-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.confirm-detail-row:last-child{border-bottom:none}
+.confirm-detail-row span:first-child{color:var(--muted)}
+.confirm-detail-row span:last-child{font-weight:500;color:var(--ink)}
+
+.confirm-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.confirm-btn{padding:12px 26px;border-radius:50px;font-family:var(--font-body);font-size:.875rem;font-weight:500;cursor:pointer;transition:all .2s}
+.confirm-btn.primary{background:var(--mint);color:#fff;border:none;box-shadow:0 4px 16px rgba(58,158,114,.25)}
+.confirm-btn.primary:hover{background:var(--mint-dk)}
+.confirm-btn.outline{background:var(--white);border:1.5px solid var(--border-2);color:var(--ink-2)}
+.confirm-btn.outline:hover{background:var(--sage)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .therapist-pick-grid{grid-template-columns:repeat(2,1fr)}
+  .cal-wrap{grid-template-columns:1fr}
+  .review-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .page-content{padding:1.5rem 1.25rem 3rem}
+  .therapist-pick-grid{grid-template-columns:1fr 1fr}
+  .session-type-row{grid-template-columns:1fr}
+  .concern-grid{grid-template-columns:repeat(2,1fr)}
+  .slots-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:480px){
+  .therapist-pick-grid{grid-template-columns:1fr}
+  .slots-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <a href="dashboard-patient.html" class="sidebar-logo">
+    <span class="logo-dot"></span> Just-Speak
+  </a>
+
+  <span class="nav-group-label">Main</span>
+  <button class="nav-item" onclick="location.href='dashboard-patient.html'"><span class="nav-icon">🏠</span> Dashboard</button>
+  <button class="nav-item active"><span class="nav-icon">📅</span> My Sessions</button>
+  <button class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></button>
+  <button class="nav-item" onclick="location.href='find-a-therapist.html'"><span class="nav-icon">🔍</span> Find Therapist</button>
+
+  <span class="nav-group-label">Wellbeing</span>
+  <button class="nav-item"><span class="nav-icon">📊</span> Mood Journal</button>
+  <button class="nav-item"><span class="nav-icon">📚</span> Resources</button>
+  <button class="nav-item"><span class="nav-icon">🎯</span> Goals</button>
+
+  <span class="nav-group-label">Account</span>
+  <button class="nav-item"><span class="nav-icon">⚙️</span> Settings</button>
+  <button class="nav-item" onclick="location.href='signin.html'"><span class="nav-icon">🚪</span> Sign out</button>
+
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-av">JS</div>
+      <div>
+        <div class="user-name">Jamie S.</div>
+        <div class="user-role">Patient · Free plan</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">My Sessions</div>
+    <div class="topbar-right">
+      <div class="top-icon-btn">🔔</div>
+      <div class="top-icon-btn" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--mint-mid),#b8ddf0);font-size:.75rem;font-weight:500;color:var(--ink);border:none">JS</div>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- TABS -->
+    <div class="tab-row" id="tabRow">
+      <div class="tab-slider" id="tabSlider"></div>
+      <button class="tab-btn active" id="tabUpcoming" onclick="switchTab('upcoming')">Upcoming</button>
+      <button class="tab-btn" id="tabPast" onclick="switchTab('past')">Past Sessions</button>
+      <button class="tab-btn" id="tabAll" onclick="switchTab('all')">All</button>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div id="emptyState">
+      <div class="empty-hero">
+        <div class="empty-illustration">🌱</div>
+        <h1 class="empty-title">Your healing journey<br>starts <em>right here</em></h1>
+        <p class="empty-sub">You don't have any sessions booked yet. Book your first appointment with a licensed therapist and take that first step forward.</p>
+
+        <!-- HOW IT WORKS STEPS -->
+        <div class="steps-row">
+          <div class="step-item">
+            <div class="step-circle">1</div>
+            <div class="step-label">Choose<br>a therapist</div>
+          </div>
+          <div class="step-item">
+            <div class="step-circle">2</div>
+            <div class="step-label">Pick date<br>&amp; time</div>
+          </div>
+          <div class="step-item">
+            <div class="step-circle">3</div>
+            <div class="step-label">Share your<br>concerns</div>
+          </div>
+          <div class="step-item">
+            <div class="step-circle" style="background:var(--mint-lt);border-color:var(--mint)">4</div>
+            <div class="step-label">Session<br>confirmed!</div>
+          </div>
+        </div>
+
+        <button class="btn-book-first" onclick="startBooking()">
+          📅 Book Your First Session
+        </button>
+        <p class="or-text">or</p>
+        <button class="btn-browse" onclick="location.href='find_therapists.html'">Browse all therapists →</button>
+      </div>
+    </div>
+
+    <!-- BOOKING WIZARD -->
+    <div class="wizard" id="wizard">
+
+      <!-- Progress bar -->
+      <div class="wiz-progress" id="wizProgress">
+        <div class="wiz-step active" id="ws1"><div class="wiz-num">1</div><div class="wiz-step-label">Choose Therapist</div></div>
+        <div class="wiz-line" id="wl1"></div>
+        <div class="wiz-step" id="ws2"><div class="wiz-num">2</div><div class="wiz-step-label">Session Type</div></div>
+        <div class="wiz-line" id="wl2"></div>
+        <div class="wiz-step" id="ws3"><div class="wiz-num">3</div><div class="wiz-step-label">Date &amp; Time</div></div>
+        <div class="wiz-line" id="wl3"></div>
+        <div class="wiz-step" id="ws4"><div class="wiz-num">4</div><div class="wiz-step-label">Your Concerns</div></div>
+        <div class="wiz-line" id="wl4"></div>
+        <div class="wiz-step" id="ws5"><div class="wiz-num">5</div><div class="wiz-step-label">Review &amp; Confirm</div></div>
+      </div>
+
+      <!-- ── STEP 1: CHOOSE THERAPIST ── -->
+      <div class="wiz-panel active" id="panel1">
+        <div class="panel-card">
+          <div class="panel-heading">Choose your therapist</div>
+          <p class="panel-sub">Select from our verified, licensed therapists below — or <a href="find-a-therapist.html" style="color:var(--mint);text-decoration:none;font-weight:500">browse the full directory</a>.</p>
+          <div class="therapist-pick-grid" id="therapistPickGrid"></div>
+        </div>
+        <div class="wiz-nav">
+          <button class="btn-back" onclick="cancelWizard()">✕ Cancel</button>
+          <button class="btn-next" id="nextBtn1" onclick="goStep(2)" disabled>Choose &amp; Continue →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: SESSION TYPE ── -->
+      <div class="wiz-panel" id="panel2">
+        <div class="panel-card">
+          <div class="panel-heading">How would you like to meet?</div>
+          <p class="panel-sub">Choose the format that feels most comfortable for you.</p>
+          <div class="session-type-row">
+            <div class="type-card" onclick="selectType(this,'Video Call')">
+              <span class="type-icon">📹</span>
+              <div class="type-name">Video Call</div>
+              <div class="type-desc">Face-to-face via secure video — feels closest to in-person.</div>
+            </div>
+            <div class="type-card" onclick="selectType(this,'Voice Call')">
+              <span class="type-icon">🎧</span>
+              <div class="type-name">Voice Call</div>
+              <div class="type-desc">Audio only — great if you prefer not to be on camera.</div>
+            </div>
+            <div class="type-card" onclick="selectType(this,'Chat / Text')">
+              <span class="type-icon">💬</span>
+              <div class="type-name">Chat / Text</div>
+              <div class="type-desc">Real-time messaging — ideal if talking feels difficult right now.</div>
+            </div>
+          </div>
+        </div>
+        <div class="wiz-nav">
+          <button class="btn-back" onclick="goStep(1)">← Back</button>
+          <button class="btn-next" id="nextBtn2" onclick="goStep(3)" disabled>Next: Pick a Time →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: DATE & TIME ── -->
+      <div class="wiz-panel" id="panel3">
+        <div class="panel-card">
+          <div class="panel-heading">Pick a date &amp; time</div>
+          <p class="panel-sub">All times shown in your local timezone. Green dates have availability.</p>
+          <div class="cal-wrap">
+            <!-- Calendar -->
+            <div>
+              <div class="cal-card">
+                <div class="cal-header">
+                  <button class="cal-nav" id="calPrev">‹</button>
+                  <div class="cal-month" id="calMonthLabel"></div>
+                  <button class="cal-nav" id="calNext">›</button>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+              </div>
+            </div>
+            <!-- Time slots -->
+            <div id="timeSlotsPanel">
+              <div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:180px;color:var(--muted);font-size:.875rem;font-weight:300">
+                ← Select a date to see available times
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wiz-nav">
+          <button class="btn-back" onclick="goStep(2)">← Back</button>
+          <button class="btn-next" id="nextBtn3" onclick="goStep(4)" disabled>Next: Your Concerns →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 4: CONCERNS ── -->
+      <div class="wiz-panel" id="panel4">
+        <div class="panel-card">
+          <div class="panel-heading">What brings you here?</div>
+          <p class="panel-sub">Select what you'd like to focus on — this helps your therapist prepare. You can choose more than one.</p>
+          <div class="concern-grid">
+            <div class="concern-chip" onclick="toggleConcern(this)">😰 Anxiety</div>
+            <div class="concern-chip" onclick="toggleConcern(this)">😔 Depression</div>
+            <div class="concern-chip" onclick="toggleConcern(this)">💑 Relationships</div>
+            <div class="concern-chip" onclick="toggleConcern(this)">🔥 Stress / Burnout</div>
+            <div class="concern-chip" onclick="toggleConcern(this)">😢 Grief &amp; Loss</div>
+            <div class="concern-chip" onclick="toggleConcern(this)">😱 Trauma / PTSD</div>
+            <div class="concern-chip" onclick="toggleConcern(this)">😴 Sleep Issues</div>
+            <div class="concern-chip" onclick="toggleConcern(this)">🧠 Self-esteem</div>
+            <div class="concern-chip" onclick="toggleConcern(this)">🌀 Life Transitions</div>
+          </div>
+          <textarea class="notes-area" id="notesArea" placeholder="Anything else you'd like your therapist to know before the session? (optional)"></textarea>
+        </div>
+        <div class="wiz-nav">
+          <button class="btn-back" onclick="goStep(3)">← Back</button>
+          <button class="btn-next" onclick="goStep(5)">Review Booking →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 5: REVIEW ── -->
+      <div class="wiz-panel" id="panel5">
+        <div class="panel-card">
+          <div class="panel-heading">Review your booking</div>
+          <p class="panel-sub">Everything look good? Confirm to lock in your session.</p>
+          <div class="review-grid" id="reviewGrid"></div>
+          <div class="price-summary">
+            <div class="price-row"><span>Session fee</span><span id="reviewPrice">—</span></div>
+            <div class="price-row"><span>Platform fee</span><span>$5.00</span></div>
+            <div class="price-row total"><span><strong>Total due today</strong></span><span id="reviewTotal" style="color:var(--mint)"><strong>—</strong></span></div>
+          </div>
+          <p style="font-size:.72rem;color:var(--muted);font-weight:300;line-height:1.65">By confirming, you agree to our <a href="#" style="color:var(--mint)">cancellation policy</a>. Sessions may be rescheduled up to 24 hours before the appointment.</p>
+        </div>
+        <div class="wiz-nav">
+          <button class="btn-back" onclick="goStep(4)">← Back</button>
+          <button class="btn-next" onclick="confirmBooking()">🎉 Confirm Booking</button>
+        </div>
+      </div>
+
+    </div><!-- /wizard -->
+
+    <!-- CONFIRMATION SCREEN -->
+    <div class="confirm-screen" id="confirmScreen">
+      <div class="confirm-anim">✓</div>
+      <h2 class="confirm-title">Session <em>booked!</em><br>You're all set 🌿</h2>
+      <p class="confirm-sub-text">Your session has been confirmed and a calendar invite has been sent to your email. See you soon!</p>
+      <div class="confirm-detail-card" id="confirmDetailCard"></div>
+      <div class="confirm-actions">
+        <button class="confirm-btn primary" onclick="location.href='client_dashboard.html'">Go to Dashboard</button>
+        <button class="confirm-btn outline" onclick="bookAnother()">Book Another Session</button>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+/* ── DATA ── */
+const therapists = [
+  { id:1, name:'Dr. Sarah Chen',  emoji:'👩‍⚕️', qual:'Clinical Psychologist, PhD',   specs:['Anxiety','Stress Management'], rating:4.9, experience:12, price:150, availability:'online' },
+  { id:2, name:'Dr. Marcus Webb', emoji:'👨‍⚕️', qual:'Licensed Therapist, MFT',       specs:['Relationships','Depression'],   rating:4.8, experience:9,  price:120, availability:'today'  },
+  { id:3, name:'Dr. Priya Sharma',emoji:'👩',    qual:'Psychiatrist, MBBS MD',          specs:['Trauma & PTSD','Anxiety'],      rating:4.7, experience:15, price:200, availability:'online' },
+  { id:4, name:'Dr. James Okafor',emoji:'🧑‍⚕️', qual:'Counseling Psychologist, PsyD',  specs:['Stress Management','Grief'],    rating:4.6, experience:7,  price:110, availability:'today'  },
+  { id:5, name:'Dr. Elena Rossi', emoji:'👩',    qual:'Licensed Clinical Social Worker',specs:['Depression','Relationships'],   rating:4.8, experience:11, price:130, availability:'today'  },
+  { id:6, name:'Dr. Amir Hassan', emoji:'👨',    qual:'Psychotherapist, MSc',           specs:['Anxiety','Depression'],         rating:4.5, experience:6,  price:95,  availability:'online' },
+];
+
+const TIME_SLOTS = {
+  morning: ['8:00 AM','8:30 AM','9:00 AM','9:30 AM','10:00 AM','10:30 AM'],
+  afternoon:['12:00 PM','12:30 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM'],
+  evening: ['5:00 PM','5:30 PM','6:00 PM','7:00 PM','7:30 PM','8:00 PM']
+};
+const BOOKED_SLOTS = ['9:00 AM','2:00 PM','5:30 PM'];
+
+/* ── STATE ── */
+const booking = { therapist:null, type:null, date:null, time:null, concerns:[], notes:'' };
+let calDate = new Date();
+
+/* ── TABS ── */
+function switchTab(tab) {
+  ['upcoming','past','all'].forEach(t => {
+    document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+  });
+  const btns = document.querySelectorAll('.tab-btn');
+  let idx = ['upcoming','past','all'].indexOf(tab);
+  const slider = document.getElementById('tabSlider');
+  const bw = btns[0].offsetWidth;
+  slider.style.width = bw+'px';
+  slider.style.transform = `translateX(${idx * bw}px)`;
+}
+
+window.addEventListener('load', () => {
+  const btns = document.querySelectorAll('.tab-btn');
+  const slider = document.getElementById('tabSlider');
+  slider.style.width = btns[0].offsetWidth + 'px';
+  slider.style.transform = 'translateX(0)';
+});
+
+/* ── EMPTY → WIZARD ── */
+function startBooking() {
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('wizard').classList.add('visible');
+  renderTherapistPicks();
+}
+
+function cancelWizard() {
+  document.getElementById('wizard').classList.remove('visible');
+  document.getElementById('emptyState').style.display = '';
+  Object.assign(booking, { therapist:null, type:null, date:null, time:null, concerns:[], notes:'' });
+}
+
+/* ── STEP NAVIGATION ── */
+function goStep(n) {
+  document.querySelectorAll('.wiz-panel').forEach((p,i) => p.classList.toggle('active', i+1===n));
+  for (let i=1; i<=5; i++) {
+    const ws = document.getElementById('ws'+i);
+    ws.classList.toggle('done',   i < n);
+    ws.classList.toggle('active', i === n);
+    if (i < 5) document.getElementById('wl'+i).classList.toggle('filled', i < n);
+  }
+  if (n === 3) buildCalendar();
+  if (n === 5) buildReview();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── STEP 1: THERAPIST PICKS ── */
+function renderTherapistPicks() {
+  document.getElementById('therapistPickGrid').innerHTML = therapists.map(t => `
+    <div class="pick-card" onclick="selectTherapist(this, ${t.id})" data-id="${t.id}">
+      <div class="pick-av">${t.emoji}</div>
+      <div class="pick-name">${t.name}</div>
+      <div class="pick-qual">${t.qual}</div>
+      <div class="pick-tags">${t.specs.map(s=>`<span class="pick-tag">${s}</span>`).join('')}</div>
+      <div class="pick-meta">
+        <div class="pick-meta-item"><strong>${t.experience} yrs</strong></div>
+        <div class="pick-meta-item"><strong>$${t.price}</strong>/session</div>
+        <div class="pick-meta-item pick-stars">${'★'.repeat(Math.floor(t.rating))} <strong>${t.rating}</strong></div>
+      </div>
+    </div>`).join('');
+}
+
+function selectTherapist(el, id) {
+  document.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  booking.therapist = therapists.find(t => t.id === id);
+  document.getElementById('nextBtn1').disabled = false;
+}
+
+/* ── STEP 2: SESSION TYPE ── */
+function selectType(el, type) {
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  booking.type = type;
+  document.getElementById('nextBtn2').disabled = false;
+}
+
+/* ── STEP 3: CALENDAR ── */
+function buildCalendar() {
+  const now = new Date();
+  const year = calDate.getFullYear(), month = calDate.getMonth();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthLabel').textContent = `${months[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const dayLabels = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html = dayLabels.map(d => `<div class="cal-day-label">${d}</div>`).join('');
+
+  for (let i=0; i<firstDay; i++) html += `<div class="cal-day empty"></div>`;
+  for (let d=1; d<=daysInMonth; d++) {
+    const thisDate = new Date(year, month, d);
+    const isPast = thisDate < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const isToday = thisDate.toDateString() === now.toDateString();
+    const isSelected = booking.date && thisDate.toDateString() === new Date(booking.date).toDateString();
+    // make weekdays available, weekends unavailable
+    const isWeekend = thisDate.getDay() === 0 || thisDate.getDay() === 6;
+    let cls = 'cal-day ';
+    if (isPast) cls += 'past';
+    else if (isWeekend) cls += 'unavailable';
+    else cls += 'available';
+    if (isToday) cls += ' today';
+    if (isSelected) cls = 'cal-day selected';
+    html += `<div class="${cls}" onclick="selectDate('${thisDate.toDateString()}')">${d}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+
+  document.getElementById('calPrev').onclick = () => { calDate = new Date(year, month-1, 1); buildCalendar(); };
+  document.getElementById('calNext').onclick = () => { calDate = new Date(year, month+1, 1); buildCalendar(); };
+}
+
+function selectDate(dateStr) {
+  booking.date = dateStr; booking.time = null;
+  buildCalendar();
+  renderTimeSlots();
+  document.getElementById('nextBtn3').disabled = true;
+}
+
+function renderTimeSlots() {
+  const sections = [['morning','🌅 Morning'],['afternoon','☀️ Afternoon'],['evening','🌙 Evening']];
+  let html = '';
+  sections.forEach(([key, label]) => {
+    html += `<div class="time-section-label">${label}</div><div class="slots-grid">`;
+    TIME_SLOTS[key].forEach(s => {
+      const isBooked = BOOKED_SLOTS.includes(s);
+      const isSelected = booking.time === s;
+      let cls = isBooked ? 'slot booked' : (isSelected ? 'slot selected' : 'slot');
+      html += `<div class="${cls}" onclick="${isBooked?'':'selectSlot(this,\''+s+'\')'}">${s}</div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('timeSlotsPanel').innerHTML = html;
+}
+
+function selectSlot(el, time) {
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  booking.time = time;
+  document.getElementById('nextBtn3').disabled = false;
+}
+
+/* ── STEP 4: CONCERNS ── */
+function toggleConcern(el) {
+  el.classList.toggle('selected');
+  booking.concerns = [...document.querySelectorAll('.concern-chip.selected')].map(c => c.textContent.trim());
+}
+
+/* ── STEP 5: REVIEW ── */
+function buildReview() {
+  booking.notes = document.getElementById('notesArea').value;
+  const t = booking.therapist;
+  const total = t.price + 5;
+  document.getElementById('reviewPrice').textContent = `$${t.price}.00`;
+  document.getElementById('reviewTotal').innerHTML = `<strong>$${total}.00</strong>`;
+
+  const dateObj = new Date(booking.date);
+  const dateFormatted = dateObj.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  document.getElementById('reviewGrid').innerHTML = `
+    <div class="review-block">
+      <span class="review-label">Therapist</span>
+      <div class="review-val">${t.emoji} ${t.name} <small>${t.qual}</small></div>
+    </div>
+    <div class="review-block">
+      <span class="review-label">Session type</span>
+      <div class="review-val">${booking.type}</div>
+    </div>
+    <div class="review-block">
+      <span class="review-label">Date &amp; Time</span>
+      <div class="review-val">${dateFormatted} <small>at ${booking.time}</small></div>
+    </div>
+    <div class="review-block">
+      <span class="review-label">Duration</span>
+      <div class="review-val">50 minutes</div>
+    </div>
+    ${booking.concerns.length ? `
+    <div class="review-block" style="grid-column:1/-1">
+      <span class="review-label">Focus areas</span>
+      <div class="review-val" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+        ${booking.concerns.map(c=>`<span style="font-size:.72rem;padding:3px 10px;border-radius:20px;background:var(--mint-lt);color:var(--mint);font-weight:500">${c}</span>`).join('')}
+      </div>
+    </div>` : ''}`;
+}
+
+/* ── CONFIRM ── */
+function confirmBooking() {
+  const t = booking.therapist;
+  const dateFormatted = new Date(booking.date).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('wizard').classList.remove('visible');
+  const cs = document.getElementById('confirmScreen');
+  cs.classList.add('visible');
+
+  document.getElementById('confirmDetailCard').innerHTML = `
+    <div class="confirm-therapist-row">
+      <div class="confirm-av">${t.emoji}</div>
+      <div>
+        <div class="confirm-info-name">${t.name}</div>
+        <div class="confirm-info-qual">${t.qual}</div>
+      </div>
+    </div>
+    <div class="confirm-detail-row"><span>Type</span><span>${booking.type}</span></div>
+    <div class="confirm-detail-row"><span>Date</span><span>${dateFormatted}</span></div>
+    <div class="confirm-detail-row"><span>Time</span><span>${booking.time}</span></div>
+    <div class="confirm-detail-row"><span>Duration</span><span>50 minutes</span></div>
+    <div class="confirm-detail-row"><span>Total charged</span><span style="color:var(--mint);font-weight:600">$${t.price + 5}.00</span></div>`;
+}
+
+function bookAnother() {
+  document.getElementById('confirmScreen').classList.remove('visible');
+  Object.assign(booking,{therapist:null,type:null,date:null,time:null,concerns:[],notes:''});
+  document.getElementById('emptyState').style.display = '';
+}
+</script>
+</body>
+</html>

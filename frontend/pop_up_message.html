@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .navbar .logo { font-size: 17px; font-weight: 600; color: #185FA5; }
+    .navbar .nav-right { display: flex; align-items: center; gap: 14px; }
+    .navbar .nav-right span { font-size: 13px; color: #64748b; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #B5D4F4; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: #0C447C;
+    }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+
+    .welcome { font-size: 20px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
+    .welcome-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+
+    /* ── METRIC CARDS ── */
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+    .metric-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: #94a3b8; }
+    .metric-value { font-size: 24px; font-weight: 600; color: #1e293b; margin-top: 6px; }
+    .metric-sub { font-size: 12px; color: #64748b; margin-top: 3px; }
+
+    /* ── SECTIONS ── */
+    .section-title { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 12px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .appointment-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .appointment-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .appt-dot { width: 9px; height: 9px; border-radius: 50%; background: #378ADD; flex-shrink: 0; }
+    .appt-dot.green { background: #639922; }
+    .appt-name { font-size: 13px; font-weight: 500; color: #1e293b; }
+    .appt-time { font-size: 12px; color: #94a3b8; }
+    .appt-badge {
+      margin-left: auto; font-size: 11px;
+      padding: 3px 10px; border-radius: 20px;
+      background: #E6F1FB; color: #185FA5; font-weight: 500;
+    }
+    .appt-badge.done { background: #EAF3DE; color: #3B6D11; }
+
+    .med-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+    .med-item:last-child { border-bottom: none; }
+    .med-name { font-size: 13px; font-weight: 500; color: #1e293b; }
+    .med-dose { font-size: 12px; color: #94a3b8; }
+    .med-freq { font-size: 12px; color: #64748b; background: #f8fafc; padding: 2px 8px; border-radius: 6px; }
+
+    /* ── OVERLAY ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.3s ease;
+    }
+    .overlay.hidden { display: none; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp {
+      from { transform: scale(0.88) translateY(20px); opacity: 0; }
+      to   { transform: scale(1) translateY(0);       opacity: 1; }
+    }
+
+    /* ── MODAL ── */
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      width: 380px;
+      padding: 32px 28px 26px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-icon-wrap {
+      width: 58px; height: 58px; border-radius: 50%;
+      background: #FAECE7;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; font-size: 26px;
+    }
+
+    .mandatory-badge {
+      display: inline-block;
+      font-size: 10px; font-weight: 700;
+      background: #FCEBEB; color: #A32D2D;
+      padding: 4px 12px; border-radius: 20px;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 18px; font-weight: 700;
+      color: #1e293b; text-align: center; margin-bottom: 8px;
+    }
+    .modal-desc {
+      font-size: 13px; color: #64748b;
+      text-align: center; line-height: 1.65; margin-bottom: 20px;
+    }
+
+    .test-info-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .test-info-row {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 6px 0;
+    }
+    .test-info-row:not(:last-child) { border-bottom: 1px solid #e2e8f0; }
+    .test-info-label { font-size: 12px; color: #94a3b8; }
+    .test-info-val { font-size: 12px; font-weight: 600; color: #1e293b; }
+    .test-info-val.danger { color: #A32D2D; }
+
+    .btn-primary {
+      width: 100%; padding: 12px;
+      border-radius: 10px;
+      background: #185FA5; color: #fff;
+      border: none; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+      margin-bottom: 10px;
+    }
+    .btn-primary:hover { background: #0C447C; }
+
+    .btn-secondary {
+      width: 100%; padding: 11px;
+      border-radius: 10px;
+      background: transparent; color: #64748b;
+      border: 1px solid #e2e8f0;
+      font-size: 13px; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: #f8fafc; }
+
+    .modal-footer-note {
+      font-size: 11px; color: #94a3b8;
+      text-align: center; margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b; color: #f8fafc;
+      font-size: 13px; padding: 12px 22px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: none; z-index: 200;
+      animation: slideUp 0.3s ease;
+    }
+    .toast.success { background: #185FA5; }
+    .toast.remind  { background: #3B6D11; }
+
+    @media (max-width: 640px) {
+      .metrics { grid-template-columns: 1fr; }
+      .grid-2  { grid-template-columns: 1fr; }
+      .modal   { width: 92%; padding: 24px 18px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="logo">🏥 MediCare Portal</div>
+    <div class="nav-right">
+      <span>Aisha Sharma</span>
+      <div class="avatar">AS</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="container">
+    <div class="welcome">Good morning, Aisha 👋</div>
+    <div class="welcome-sub">Here's your health summary for today — Tuesday, April 21, 2026</div>
+
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Heart rate</div>
+        <div class="metric-value">72 <span style="font-size:14px;color:#94a3b8;">bpm</span></div>
+        <div class="metric-sub">Normal range</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Blood pressure</div>
+        <div class="metric-value">118/76</div>
+        <div class="metric-sub">Optimal · mmHg</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Next appointment</div>
+        <div class="metric-value" style="font-size:16px;margin-top:8px;">May 3, 2026</div>
+        <div class="metric-sub">Dr. Mehta · 10:30 AM</div>
+      </div>
+    </div>
+
+    <!-- Appointments + Medications -->
+    <div class="grid-2">
+      <div>
+        <div class="section-title">Upcoming appointments</div>
+        <div class="card">
+          <div class="appointment-item">
+            <div class="appt-dot"></div>
+            <div>
+              <div class="appt-name">General checkup</div>
+              <div class="appt-time">May 3 · 10:30 AM · Dr. Mehta</div>
+            </div>
+            <div class="appt-badge">Scheduled</div>
+          </div>
+          <div class="appointment-item">
+            <div class="appt-dot green"></div>
+            <div>
+              <div class="appt-name">Blood test review</div>
+              <div class="appt-time">Apr 15 · 9:00 AM · Dr. Kapoor</div>
+            </div>
+            <div class="appt-badge done">Completed</div>
+          </div>
+          <div class="appointment-item">
+            <div class="appt-dot"></div>
+            <div>
+              <div class="appt-name">Cardiology follow-up</div>
+              <div class="appt-time">May 18 · 2:00 PM · Dr. Verma</div>
+            </div>
+            <div class="appt-badge">Scheduled</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Current medications</div>
+        <div class="card">
+          <div class="med-item">
+            <div>
+              <div class="med-name">Metformin</div>
+              <div class="med-dose">500 mg</div>
+            </div>
+            <div class="med-freq">Twice daily</div>
+          </div>
+          <div class="med-item">
+            <div>
+              <div class="med-name">Atorvastatin</div>
+              <div class="med-dose">10 mg</div>
+            </div>
+            <div class="med-freq">Once daily</div>
+          </div>
+          <div class="med-item">
+            <div>
+              <div class="med-name">Vitamin D3</div>
+              <div class="med-dose">1000 IU</div>
+            </div>
+            <div class="med-freq">Once daily</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY + MODAL -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div style="text-align:center;">
+        <div class="modal-icon-wrap">📋</div>
+        <div class="mandatory-badge">⚠ Mandatory</div>
+        <div class="modal-title">Health Assessment Test Required</div>
+        <div class="modal-desc">
+          Your annual health screening test is due. This test is
+          <strong>required</strong> before your next appointment and
+          must be completed within 7 days.
+        </div>
+      </div>
+
+      <div class="test-info-box">
+        <div class="test-info-row">
+          <span class="test-info-label">Test name</span>
+          <span class="test-info-val">Annual Health Screening</span>
+        </div>
+        <div class="test-info-row">
+          <span class="test-info-label">Estimated time</span>
+          <span class="test-info-val">~15 minutes</span>
+        </div>
+        <div class="test-info-row">
+          <span class="test-info-label">Due date</span>
+          <span class="test-info-val danger">Apr 28, 2026</span>
+        </div>
+        <div class="test-info-row">
+          <span class="test-info-label">Assigned by</span>
+          <span class="test-info-val">Dr. Mehta</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="takeTest()">Take Test Now →</button>
+      <button class="btn-secondary" onclick="remindLater()">Remind me later today</button>
+
+      <div class="modal-footer-note">
+        This test cannot be permanently skipped.<br>
+        It is required as part of your care plan.
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── Show popup on dashboard load ──────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      // You can replace this with an API call to check if test is pending
+      const testPending = true; // <-- replace with actual backend check
+
+      if (testPending) {
+        document.getElementById('overlay').classList.remove('hidden');
+      }
+    });
+
+    // ── Take test now ──────────────────────────────────────────
+    function takeTest() {
+      hideOverlay();
+      showToast('Redirecting to your health assessment test…', 'success');
+
+      // Redirect after short delay
+      setTimeout(() => {
+        // window.location.href = '/tests/annual-health-screening'; // <-- your test page URL
+        alert('Redirecting to test page... (add your test URL here)');
+      }, 1500);
+    }
+
+    // ── Remind later ───────────────────────────────────────────
+    function remindLater() {
+      hideOverlay();
+      showToast('✓ Reminder set. You will be reminded in 4 hours.', 'remind');
+
+      // Optional: send reminder preference to backend
+      // fetch('/api/patient/test-reminder', { method: 'POST', body: JSON.stringify({ remindIn: 4 }) });
+    }
+
+    // ── Helpers ────────────────────────────────────────────────
+    function hideOverlay() {
+      const overlay = document.getElementById('overlay');
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.25s';
+      setTimeout(() => overlay.classList.add('hidden'), 250);
+    }
+
+    function showToast(message, type) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast ' + type;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+  </script>
+
+</body>
+</html>

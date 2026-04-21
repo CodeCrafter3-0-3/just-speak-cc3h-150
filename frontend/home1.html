@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindBridge — Connect with a Therapist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sky: #dff0f7;
+    --sky-mid: #b8ddf0;
+    --sky-dark: #5ba3c9;
+    --mint: #d8f0e6;
+    --mint-mid: #a8dcc2;
+    --mint-dark: #3a9e72;
+    --sage: #e8f2ec;
+    --cream: #fafcfb;
+    --white: #ffffff;
+    --ink: #1a2e24;
+    --ink-light: #3d5247;
+    --muted: #6b8c7a;
+    --border: rgba(58,158,114,0.15);
+    --radius-sm: 10px;
+    --radius-md: 18px;
+    --radius-lg: 28px;
+    --radius-xl: 40px;
+    --font-display: 'Lora', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+    --shadow-sm: 0 2px 12px rgba(58,158,114,0.08);
+    --shadow-md: 0 8px 32px rgba(58,158,114,0.12);
+    --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,252,251,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    color: var(--ink);
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+  .nav-logo-dot {
+    width: 10px; height: 10px;
+    background: var(--mint-dark);
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 2rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.9rem;
+    color: var(--ink-light);
+    text-decoration: none;
+    font-weight: 400;
+    transition: color var(--transition);
+  }
+  .nav-links a:hover { color: var(--mint-dark); }
+  .nav-cta {
+    background: var(--mint-dark);
+    color: #fff !important;
+    padding: 9px 22px;
+    border-radius: 50px;
+    font-weight: 500 !important;
+    transition: background var(--transition), transform var(--transition) !important;
+  }
+  .nav-cta:hover { background: var(--ink) !important; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 92vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 4rem;
+    padding: 5rem 5% 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 80% 40%, rgba(183,228,208,0.35) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 10% 80%, rgba(184,221,240,0.3) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-text { position: relative; z-index: 1; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--mint);
+    color: var(--mint-dark);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 50px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(58,158,114,0.2);
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge-dot {
+    width: 7px; height: 7px;
+    background: var(--mint-dark);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+    line-height: 1.2;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  h1 em {
+    color: var(--mint-dark);
+    font-style: italic;
+  }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 2.5rem;
+    max-width: 42ch;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-buttons {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--mint-dark);
+    color: #fff;
+    padding: 14px 30px;
+    border-radius: 50px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover {
+    background: var(--ink);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(26,46,36,0.2);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    padding: 13px 28px;
+    border-radius: 50px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 400;
+    border: 1.5px solid rgba(58,158,114,0.35);
+    cursor: pointer;
+    transition: all var(--transition);
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-secondary:hover {
+    border-color: var(--mint-dark);
+    background: var(--mint);
+    transform: translateY(-2px);
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; margin-top: 3rem;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .stat-item { text-align: left; }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 500;
+    color: var(--ink);
+    display: block;
+  }
+  .stat-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.03em;
+  }
+  .stat-divider {
+    width: 1px;
+    background: var(--border);
+    align-self: stretch;
+  }
+
+  /* ── HERO ILLUSTRATION ── */
+  .hero-visual {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .hero-illustration {
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 1 / 1.05;
+    position: relative;
+  }
+  .illustration-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(145deg, var(--sky) 0%, var(--mint) 100%);
+    border-radius: 60% 40% 55% 45% / 45% 55% 45% 55%;
+    animation: morphBlob 8s ease-in-out infinite;
+  }
+  @keyframes morphBlob {
+    0%, 100% { border-radius: 60% 40% 55% 45% / 45% 55% 45% 55%; }
+    33% { border-radius: 50% 50% 40% 60% / 55% 45% 55% 45%; }
+    66% { border-radius: 40% 60% 60% 40% / 40% 60% 40% 60%; }
+  }
+  .illustration-scene {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .float-card {
+    position: absolute;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    box-shadow: var(--shadow-md);
+    font-size: 0.82rem;
+    border: 1px solid var(--border);
+  }
+  .float-card-1 {
+    top: 8%; left: -5%;
+    animation: floatA 4s ease-in-out infinite;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .float-card-2 {
+    bottom: 12%; right: -5%;
+    animation: floatB 4.5s ease-in-out infinite;
+  }
+  @keyframes floatA {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes floatB {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(8px); }
+  }
+  .avatar-ring {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--mint-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .card-text strong { display: block; font-weight: 500; color: var(--ink); font-size: 0.85rem; }
+  .card-text span { color: var(--muted); font-size: 0.75rem; }
+  .stars { color: #f5a623; font-size: 0.7rem; }
+  .online-dot {
+    width: 8px; height: 8px;
+    background: #4caf7d;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+  }
+
+  /* ── SECTION WRAPPER ── */
+  section { padding: 6rem 5%; }
+  .section-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mint-dark);
+    background: var(--mint);
+    padding: 5px 14px;
+    border-radius: 50px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(58,158,114,0.2);
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+  }
+  h2 em { color: var(--mint-dark); font-style: italic; }
+  .section-intro {
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 52ch;
+    margin-bottom: 3.5rem;
+    line-height: 1.75;
+  }
+  .section-header { margin-bottom: 3rem; }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { background: var(--sage); }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    position: relative;
+  }
+  .steps-grid::before {
+    content: '';
+    position: absolute;
+    top: 38px; left: calc(16.66% + 2rem); right: calc(16.66% + 2rem);
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--mint-mid), transparent);
+  }
+  .step-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: transform var(--transition), box-shadow var(--transition);
+    position: relative;
+  }
+  .step-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-md);
+  }
+  .step-num {
+    width: 56px; height: 56px;
+    background: var(--mint);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--mint-dark);
+    font-weight: 500;
+    border: 2px solid rgba(58,158,114,0.2);
+    position: relative; z-index: 1;
+  }
+  .step-icon { font-size: 1.5rem; }
+  .step-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+  }
+  .step-card p { font-size: 0.9rem; color: var(--muted); font-weight: 300; line-height: 1.7; }
+
+  /* ── CATEGORIES ── */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  .cat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.5rem;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--mint-dark), var(--sky-dark));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition);
+  }
+  .cat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--mint-mid);
+  }
+  .cat-card:hover::before { transform: scaleX(1); }
+  .cat-icon {
+    width: 52px; height: 52px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .cat-icon.anxiety { background: #e8f4fd; }
+  .cat-icon.depression { background: #f0eafd; }
+  .cat-icon.stress { background: #fdf5e8; }
+  .cat-icon.relationships { background: #fde8f0; }
+  .cat-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .cat-card p { font-size: 0.82rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+  .cat-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.8rem;
+    color: var(--mint-dark);
+    margin-top: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: gap var(--transition);
+  }
+  .cat-card:hover .cat-link { gap: 8px; }
+
+  /* ── THERAPISTS ── */
+  .therapists-section { background: var(--sky); }
+  .therapists-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .therapist-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    border: 1px solid var(--border);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .therapist-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-md);
+  }
+  .therapist-top {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .therapist-avatar {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+  .therapist-name {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .therapist-spec {
+    font-size: 0.8rem;
+    color: var(--mint-dark);
+    font-weight: 500;
+    background: var(--mint);
+    padding: 3px 10px;
+    border-radius: 50px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+  .therapist-rating {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .rating-stars { color: #f5a623; }
+  .therapist-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 1.25rem;
+  }
+  .tag {
+    font-size: 0.72rem;
+    color: var(--ink-light);
+    background: var(--sage);
+    padding: 4px 10px;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+  }
+  .btn-outline {
+    width: 100%;
+    padding: 11px;
+    border-radius: 50px;
+    border: 1.5px solid rgba(58,158,114,0.3);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-weight: 400;
+  }
+  .btn-outline:hover {
+    background: var(--mint-dark);
+    color: #fff;
+    border-color: var(--mint-dark);
+  }
+
+  /* ── TRUST ── */
+  .trust-section {
+    background: var(--ink);
+    color: #fff;
+  }
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .trust-item {
+    text-align: center;
+    padding: 2.5rem 2rem;
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: background var(--transition);
+  }
+  .trust-item:hover { background: rgba(255,255,255,0.08); }
+  .trust-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .trust-item h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 0.6rem;
+  }
+  .trust-item p {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  .trust-section .section-tag {
+    background: rgba(255,255,255,0.1);
+    color: var(--mint-mid);
+    border-color: rgba(255,255,255,0.1);
+  }
+  .trust-section h2 { color: #fff; }
+  .trust-section .section-intro { color: rgba(255,255,255,0.55); }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-section { background: var(--cream); }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .testimonial-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    border: 1px solid var(--border);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+  .quote-mark {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    color: var(--mint-mid);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .testimonial-text {
+    font-size: 0.9rem;
+    color: var(--ink-light);
+    font-weight: 300;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    font-family: var(--font-display);
+  }
+  .testimonial-author {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .author-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .author-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ink);
+    display: block;
+  }
+  .author-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* ── CTA BANNER ── */
+  .cta-section {
+    background: linear-gradient(135deg, var(--mint-dark) 0%, #2d8f65 100%);
+    padding: 7rem 5%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -20%;
+    width: 80%;
+    height: 200%;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .cta-section::after {
+    content: '';
+    position: absolute;
+    bottom: -60%; right: -15%;
+    width: 70%;
+    height: 200%;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .cta-inner { position: relative; z-index: 1; }
+  .cta-section h2 {
+    color: #fff;
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 1rem;
+    font-family: var(--font-display);
+  }
+  .cta-section p {
+    color: rgba(255,255,255,0.75);
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+  }
+  .btn-white {
+    background: #fff;
+    color: var(--mint-dark);
+    padding: 15px 38px;
+    border-radius: 50px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition);
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-white:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.2);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.6);
+    padding: 4rem 5% 2.5rem;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+  .footer-brand {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .footer-desc {
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.45);
+    max-width: 28ch;
+  }
+  .footer-heading {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.35);
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  .footer-links {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .footer-links a {
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 300;
+    transition: color var(--transition);
+  }
+  .footer-links a:hover { color: var(--mint-mid); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-copy { font-size: 0.78rem; }
+  .social-links {
+    display: flex; gap: 12px;
+  }
+  .social-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: background var(--transition), color var(--transition);
+    cursor: pointer;
+  }
+  .social-btn:hover {
+    background: var(--mint-dark);
+    color: #fff;
+    border-color: var(--mint-dark);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .categories-grid { grid-template-columns: repeat(2, 1fr); }
+    .therapists-grid { grid-template-columns: repeat(2, 1fr); }
+    .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  }
+  @media (max-width: 768px) {
+    nav { padding: 0 1.25rem; }
+    .nav-links { display: none; }
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 3rem 1.25rem 2rem;
+      text-align: center;
+      gap: 2.5rem;
+    }
+    .hero-sub { max-width: 100%; margin: 0 auto 2rem; }
+    .hero-buttons { justify-content: center; }
+    .hero-stats { justify-content: center; }
+    .hero-visual { order: -1; }
+    .hero-illustration { max-width: 280px; }
+    section { padding: 4rem 1.25rem; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .steps-grid::before { display: none; }
+    .categories-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .therapists-grid { grid-template-columns: 1fr; }
+    .trust-grid { grid-template-columns: 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+
+  /* ── SVG ILLUSTRATION ── */
+  .person-svg {
+    width: 72%;
+    height: auto;
+    display: block;
+    margin: auto;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    Just-Speak
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#categories">Focus areas</a></li>
+    <li><a href="#therapists">Therapists</a></li>
+    <li><a href="signin2.html" class="nav-cta">Get started</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      2,400+ licensed therapists ready
+    </div>
+    <h1>You're Not Alone.<br>Talk to Someone Who<br><em>Understands.</em></h1>
+    <p class="hero-sub">Connect with trusted therapists anytime, anywhere — for anxiety, depression, stress, and more.</p>
+    <div class="hero-buttons">
+      <a href="#therapists" class="btn-primary">Find a Therapist</a>
+      
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num">94%</span>
+        <span class="stat-label">Feel better after first session</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">2.4k+</span>
+        <span class="stat-label">Verified therapists</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-num">48h</span>
+        <span class="stat-label">Average match time</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-illustration">
+      <div class="illustration-bg"></div>
+      <div class="illustration-scene">
+        <svg class="person-svg" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- Plant/nature -->
+          <ellipse cx="258" cy="290" rx="28" ry="14" fill="#a8dcc2" opacity="0.6"/>
+          <rect x="252" y="240" width="12" height="55" rx="6" fill="#5ab38a"/>
+          <ellipse cx="258" cy="242" rx="20" ry="24" fill="#7dcba4"/>
+          <ellipse cx="244" cy="258" rx="14" ry="17" fill="#9dd8bc"/>
+          <ellipse cx="270" cy="255" rx="14" ry="17" fill="#9dd8bc"/>
+          <!-- Couch -->
+          <rect x="40" y="238" width="210" height="60" rx="22" fill="#b8ddf0"/>
+          <rect x="40" y="228" width="38" height="72" rx="18" fill="#9acfe6"/>
+          <rect x="212" y="228" width="38" height="72" rx="18" fill="#9acfe6"/>
+          <rect x="50" y="255" width="190" height="12" rx="6" fill="#ddf0f9" opacity="0.6"/>
+          <!-- Person body -->
+          <rect x="110" y="175" width="90" height="70" rx="28" fill="#f5c9a0"/>
+          <!-- Arms -->
+          <rect x="88" y="185" width="28" height="50" rx="14" fill="#f5c9a0"/>
+          <rect x="174" y="185" width="28" height="50" rx="14" fill="#f5c9a0"/>
+          <!-- Hands -->
+          <ellipse cx="102" cy="238" rx="12" ry="10" fill="#f0b882"/>
+          <ellipse cx="188" cy="238" rx="12" ry="10" fill="#f0b882"/>
+          <!-- Head -->
+          <ellipse cx="155" cy="148" rx="42" ry="44" fill="#f5c9a0"/>
+          <!-- Hair -->
+          <ellipse cx="155" cy="118" rx="42" ry="28" fill="#4a3020"/>
+          <ellipse cx="115" cy="138" rx="14" ry="22" fill="#4a3020"/>
+          <ellipse cx="195" cy="138" rx="14" ry="22" fill="#4a3020"/>
+          <!-- Face -->
+          <ellipse cx="140" cy="155" rx="5" ry="6" fill="#e5956a"/>
+          <ellipse cx="170" cy="155" rx="5" ry="6" fill="#e5956a"/>
+          <!-- Smile -->
+          <path d="M140 172 Q155 183 170 172" stroke="#e0845e" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- Shirt -->
+          <rect x="108" y="220" width="94" height="22" rx="10" fill="#7dcba4"/>
+          <!-- Speech bubble -->
+          <rect x="195" y="100" width="98" height="50" rx="14" fill="white" opacity="0.95"/>
+          <polygon points="202,150 195,162 214,150" fill="white" opacity="0.95"/>
+          <rect x="208" y="115" width="60" height="6" rx="3" fill="#a8dcc2"/>
+          <rect x="208" y="127" width="45" height="6" rx="3" fill="#d0ece4"/>
+          <rect x="208" y="139" width="52" height="6" rx="3" fill="#d0ece4"/>
+        </svg>
+      </div>
+
+      <div class="float-card float-card-1">
+        <div class="avatar-ring">🧑‍⚕️</div>
+        <div class="card-text">
+          <strong>Dr. Sarah Chen</strong>
+          <span><span class="online-dot"></span>Online now</span>
+        </div>
+      </div>
+
+      <div class="float-card float-card-2">
+        <div class="stars">★★★★★</div>
+        <div style="font-size:0.8rem;font-weight:500;color:var(--ink);margin-top:4px;">"Changed my life"</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">— session review</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-header reveal">
+    <span class="section-tag">Simple process</span>
+    <h2>Your path to <em>feeling better</em></h2>
+    <p class="section-intro">Three easy steps stand between you and the support you deserve. No long waitlists, no judgment.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card reveal">
+      <div class="step-num"><span class="step-icon">📋</span></div>
+      <h3>Take a brief assessment</h3>
+      <p>Answer a few gentle questions about how you're feeling. It takes just 5 minutes and helps us find the right match for you.</p>
+    </div>
+    <div class="step-card reveal" style="transition-delay:0.1s">
+      <div class="step-num"><span class="step-icon">🤝</span></div>
+      <h3>Get matched with a therapist</h3>
+      <p>Our algorithm pairs you with a licensed therapist based on your needs, preferences, and availability — within 48 hours.</p>
+    </div>
+    <div class="step-card reveal" style="transition-delay:0.2s">
+      <div class="step-num"><span class="step-icon">💬</span></div>
+      <h3>Begin your first session</h3>
+      <p>Choose how you connect — live chat, voice call, or video. You're in control of the experience, every step of the way.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section id="categories">
+  <div class="section-header reveal">
+    <span class="section-tag">Focus areas</span>
+    <h2>Support for what <em>you're going through</em></h2>
+    <p class="section-intro">Our therapists specialise across a wide range of mental health concerns. Find the care that fits your journey.</p>
+  </div>
+  <div class="categories-grid">
+    <div class="cat-card reveal">
+      <div class="cat-icon anxiety">😮‍💨</div>
+      <h3>Anxiety</h3>
+      <p>From everyday worry to panic attacks — learn grounded techniques to reclaim calm.</p>
+      <a href="#" class="cat-link">Explore therapists →</a>
+    </div>
+    <div class="cat-card reveal" style="transition-delay:0.1s">
+      <div class="cat-icon depression">🌧️</div>
+      <h3>Depression</h3>
+      <p>Feel lighter again with evidence-based therapy approaches tailored to you.</p>
+      <a href="#" class="cat-link">Explore therapists →</a>
+    </div>
+    <div class="cat-card reveal" style="transition-delay:0.2s">
+      <div class="cat-icon stress">🧘</div>
+      <h3>Stress</h3>
+      <p>Work, life, burnout — build real resilience and healthy boundaries that last.</p>
+      <a href="#" class="cat-link">Explore therapists →</a>
+    </div>
+    <div class="cat-card reveal" style="transition-delay:0.3s">
+      <div class="cat-icon relationships">💛</div>
+      <h3>Relationships</h3>
+      <p>Strengthen connections and navigate difficult dynamics with compassionate guidance.</p>
+      <a href="#" class="cat-link">Explore therapists →</a>
+    </div>
+  </div>
+</section>
+
+<!-- THERAPISTS -->
+<section class="therapists-section" id="therapists">
+  <div class="section-header reveal">
+    <span class="section-tag">Meet the team</span>
+    <h2>Featured <em>therapists</em></h2>
+    <p class="section-intro">Every MindBridge therapist is fully licensed, background-checked, and trained in evidence-based methods.</p>
+  </div>
+  <div class="therapists-grid">
+    <div class="therapist-card reveal">
+      <div class="therapist-top">
+        <div class="therapist-avatar" style="background:#dff0f7;font-size:1.6rem;">🧑‍⚕️</div>
+        <div>
+          <div class="therapist-name">Dr. Sarah Chen</div>
+          <div class="therapist-spec">Anxiety & CBT</div>
+        </div>
+      </div>
+      <div class="therapist-rating">
+        <span class="rating-stars">★★★★★</span>
+        <span>4.98 · 312 sessions</span>
+      </div>
+      <div class="therapist-tags">
+        <span class="tag">Anxiety</span>
+        <span class="tag">Panic disorders</span>
+        <span class="tag">Mindfulness</span>
+      </div>
+      <button class="btn-outline">View Profile</button>
+    </div>
+
+    <div class="therapist-card reveal" style="transition-delay:0.1s">
+      <div class="therapist-top">
+        <div class="therapist-avatar" style="background:#f0eafd;font-size:1.6rem;">👨‍⚕️</div>
+        <div>
+          <div class="therapist-name">Dr. Marcus Wells</div>
+          <div class="therapist-spec">Depression & ACT</div>
+        </div>
+      </div>
+      <div class="therapist-rating">
+        <span class="rating-stars">★★★★★</span>
+        <span>4.96 · 278 sessions</span>
+      </div>
+      <div class="therapist-tags">
+        <span class="tag">Depression</span>
+        <span class="tag">Grief</span>
+        <span class="tag">Self-worth</span>
+      </div>
+      <button class="btn-outline">View Profile</button>
+    </div>
+
+    <div class="therapist-card reveal" style="transition-delay:0.2s">
+      <div class="therapist-top">
+        <div class="therapist-avatar" style="background:#d8f0e6;font-size:1.6rem;">👩‍⚕️</div>
+        <div>
+          <div class="therapist-name">Dr. Amara Osei</div>
+          <div class="therapist-spec">Relationships & DBT</div>
+        </div>
+      </div>
+      <div class="therapist-rating">
+        <span class="rating-stars">★★★★★</span>
+        <span>4.99 · 401 sessions</span>
+      </div>
+      <div class="therapist-tags">
+        <span class="tag">Couples</span>
+        <span class="tag">Boundaries</span>
+        <span class="tag">Trauma</span>
+      </div>
+      <button class="btn-outline">View Profile</button>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust-section">
+  <div class="section-header reveal" style="text-align:center;max-width:560px;margin:0 auto 3rem;">
+    <span class="section-tag">Your safety first</span>
+    <h2>Built on <em>trust</em> and transparency</h2>
+    <p class="section-intro" style="max-width:100%;">We take your privacy and safety seriously. Every part of the platform is designed with your wellbeing at the centre.</p>
+  </div>
+  <div class="trust-grid">
+    <div class="trust-item reveal">
+      <span class="trust-icon">🔒</span>
+      <h3>100% Confidential</h3>
+      <p>Everything shared in sessions stays private. End-to-end encryption keeps your conversations secure and protected.</p>
+    </div>
+    <div class="trust-item reveal" style="transition-delay:0.1s">
+      <span class="trust-icon">✅</span>
+      <h3>Verified Therapists</h3>
+      <p>Every therapist is manually vetted, licensed by a professional body, and undergoes ongoing quality review.</p>
+    </div>
+    <div class="trust-item reveal" style="transition-delay:0.2s">
+      <span class="trust-icon">💳</span>
+      <h3>Secure Payments</h3>
+      <p>PCI-DSS compliant billing, flexible subscriptions, and transparent pricing — no hidden costs, ever.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="section-header reveal" style="text-align:center;max-width:560px;margin:0 auto 3rem;">
+    <span class="section-tag">Stories of hope</span>
+    <h2>Real people, real <em>change</em></h2>
+    <p class="section-intro" style="max-width:100%;">Thousands have found their footing again through MindBridge. Here's what they're saying.</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <span class="quote-mark">"</span>
+      <p class="testimonial-text">I was sceptical about online therapy, but after my first session with Dr. Chen I felt genuinely understood for the first time in years. My anxiety is so much more manageable now.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#dff0f7;">🌸</div>
+        <div>
+          <span class="author-name">Jamie L.</span>
+          <span class="author-meta">Anxiety · 6 months on MindBridge</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal" style="transition-delay:0.1s">
+      <span class="quote-mark">"</span>
+      <p class="testimonial-text">The matching process was spot on. I was paired with someone who really gets me. I finally have the tools to deal with depression without feeling ashamed.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#d8f0e6;">🌿</div>
+        <div>
+          <span class="author-name">Alex M.</span>
+          <span class="author-meta">Depression · 4 months on MindBridge</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal" style="transition-delay:0.2s">
+      <span class="quote-mark">"</span>
+      <p class="testimonial-text">Starting anonymously gave me the courage to open up. I didn't have to be brave all at once. MindBridge met me exactly where I was.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#fdf5e8;">☀️</div>
+        <div>
+          <span class="author-name">Sam K.</span>
+          <span class="author-meta">Stress & burnout · 3 months on MindBridge</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <h2>Take the first step towards<br>feeling better today.</h2>
+    <p>No commitment required. Your first session is always on your terms.</p>
+    <a href="#" class="btn-white">Get Started — It's Free</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">
+        <span style="width:8px;height:8px;background:var(--mint-mid);border-radius:50%;display:inline-block;"></span>
+        MindBridge
+      </div>
+      <p class="footer-desc">A safe, supportive space to connect with licensed therapists whenever you need them.</p>
+    </div>
+    <div>
+      <div class="footer-heading">Platform</div>
+      <ul class="footer-links">
+        <li><a href="#">How it works</a></li>
+        <li><a href="#">Find a therapist</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Anonymous chat</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-heading">Legal</div>
+      <ul class="footer-links">
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Cookie Settings</a></li>
+        <li><a href="#">Accessibility</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 MindBridge. All rights reserved. Not a crisis service — if you're in immediate danger, please call emergency services.</span>
+    <div class="social-links">
+      <a class="social-btn" aria-label="Twitter" title="Twitter">𝕏</a>
+      <a class="social-btn" aria-label="Instagram" title="Instagram">ig</a>
+      <a class="social-btn" aria-label="LinkedIn" title="LinkedIn">in</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

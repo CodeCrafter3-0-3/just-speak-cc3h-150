@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mindo — Therapist Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F7F9; }
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar { width: 210px; background: #1a2e2a; display: flex; flex-direction: column; flex-shrink: 0; }
+  .logo { padding: 20px 16px; border-bottom: 0.5px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 30px; height: 30px; background: #1D9E75; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 16px; height: 16px; fill: white; }
+  .logo-name { font-size: 15px; font-weight: 600; color: white; }
+  .logo-sub { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 1px; text-transform: uppercase; }
+  .nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.5); font-size: 13px; transition: all 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: rgba(29,158,117,0.2); color: #5DCAA5; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-divider { height: 0.5px; background: rgba(255,255,255,0.07); margin: 6px 8px; }
+  .logout { padding: 12px 8px; border-top: 0.5px solid rgba(255,255,255,0.07); }
+  .logout-btn { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: rgba(255,255,255,0.38); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .logout-btn:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); }
+  .logout-btn svg { width: 16px; height: 16px; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .header { background: white; border-bottom: 1px solid #eee; padding: 0 24px; height: 62px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .greeting-name { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+  .greeting-sub { font-size: 12px; color: #888; margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .notif-btn { position: relative; width: 36px; height: 36px; border-radius: 8px; border: 1px solid #eee; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; }
+  .notif-btn:hover { background: #f5f5f5; }
+  .notif-btn svg { width: 18px; height: 18px; color: #666; }
+  .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; background: #E24B4A; border-radius: 50%; border: 1.5px solid white; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #1D9E75; color: white; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #9FE1CB; }
+
+  /* CONTENT GRID */
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; display: grid; grid-template-columns: 1fr 310px; grid-template-rows: auto auto auto; gap: 16px; align-content: start; }
+  .card { background: white; border-radius: 12px; border: 1px solid #eee; padding: 16px; }
+  .card-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+
+  /* SCHEDULE */
+  .schedule-col { grid-column: 1; grid-row: 1; }
+  .session-list { display: flex; flex-direction: column; gap: 10px; }
+  .session-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; border: 1px solid #eee; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+  .session-card:hover { border-color: #ccc; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .session-card.ongoing { border-color: #1D9E75; background: #f0fbf7; }
+  .session-card.completed { opacity: 0.55; }
+  .time-col { text-align: center; min-width: 46px; }
+  .time-val { font-size: 13px; font-weight: 600; color: #222; }
+  .time-ap { font-size: 10px; color: #aaa; }
+  .sess-divider { width: 1px; height: 38px; background: #eee; flex-shrink: 0; }
+  .ongoing .sess-divider { background: #1D9E75; }
+  .sess-info { flex: 1; }
+  .patient-name { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .sess-meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
+  .sess-type { font-size: 11px; color: #888; display: flex; align-items: center; gap: 4px; }
+  .sess-type svg { width: 11px; height: 11px; }
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-upcoming { background: #E6F1FB; color: #185FA5; }
+  .badge-ongoing { background: #E1F5EE; color: #0F6E56; }
+  .badge-done { background: #f0f0f0; color: #888; }
+  .start-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: opacity 0.15s; }
+  .btn-active { background: #1D9E75; color: white; }
+  .btn-active:hover { opacity: 0.85; }
+  .btn-inactive { background: #f0f0f0; color: #aaa; cursor: default; }
+  .btn-done { background: transparent; border: 1px solid #ddd; color: #888; font-size: 11px; }
+  .btn-done:hover { background: #f8f8f8; }
+
+  /* RIGHT COLUMN */
+  .right-col { grid-column: 2; grid-row: 1 / 4; display: flex; flex-direction: column; gap: 16px; }
+
+  /* NOTIFICATIONS */
+  .notif-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; align-items: flex-start; }
+  .notif-item:last-child { border-bottom: none; }
+  .notif-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ni-blue { background: #E6F1FB; }
+  .ni-teal { background: #E1F5EE; }
+  .ni-amber { background: #FAEEDA; }
+  .notif-icon svg { width: 14px; height: 14px; }
+  .notif-msg { font-size: 12px; color: #333; line-height: 1.45; }
+  .notif-msg strong { font-weight: 600; }
+  .notif-time { font-size: 10px; color: #aaa; margin-top: 2px; }
+
+  /* UPCOMING */
+  .appt-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+  .appt-row:last-child { border-bottom: none; }
+  .appt-date { background: #E1F5EE; border-radius: 8px; padding: 6px 8px; text-align: center; min-width: 40px; }
+  .appt-dd { font-size: 15px; font-weight: 700; color: #085041; }
+  .appt-mo { font-size: 9px; color: #0F6E56; text-transform: uppercase; letter-spacing: 0.5px; }
+  .appt-info { flex: 1; }
+  .appt-name { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+  .appt-time { font-size: 11px; color: #888; }
+  .appt-actions { display: flex; gap: 4px; }
+  .mini-btn { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 500; cursor: pointer; border: 1px solid #ddd; background: white; color: #666; transition: background 0.12s; }
+  .mini-btn:hover { background: #f5f5f5; }
+  .mini-btn.accept { border-color: #1D9E75; color: #0F6E56; }
+  .mini-btn.accept:hover { background: #E1F5EE; }
+
+  /* BOTTOM LEFT */
+  .bottom-left { grid-column: 1; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* EARNINGS */
+  .earn-nums { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .e-stat { background: #f8f9fa; border-radius: 8px; padding: 12px; }
+  .e-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .e-value { font-size: 19px; font-weight: 700; color: #1a1a1a; }
+  .e-value.green { color: #0F6E56; }
+  .chart-wrap { height: 80px; margin-bottom: 6px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 100%; }
+  .bar { flex: 1; border-radius: 4px 4px 0 0; cursor: pointer; transition: opacity 0.15s; }
+  .bar:hover { opacity: 0.7; }
+  .chart-labels { display: flex; gap: 6px; margin-bottom: 12px; }
+  .chart-labels span { flex: 1; text-align: center; font-size: 9px; color: #aaa; }
+  .withdraw-btn { width: 100%; padding: 9px; border-radius: 8px; background: #1D9E75; color: white; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: opacity 0.15s; }
+  .withdraw-btn:hover { opacity: 0.85; }
+
+  /* PATIENTS */
+  .pat-stats { display: flex; gap: 10px; margin-bottom: 14px; }
+  .pat-stat { flex: 1; background: #f8f9fa; border-radius: 8px; padding: 10px; text-align: center; }
+  .pat-num { font-size: 22px; font-weight: 700; color: #1a1a1a; }
+  .pat-lbl { font-size: 10px; color: #888; margin-top: 1px; }
+  .patient-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+  .patient-row:last-child { border-bottom: none; }
+  .p-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: white; flex-shrink: 0; }
+  .p-name { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+  .p-last { font-size: 11px; color: #aaa; }
+  .p-dot { width: 7px; height: 7px; border-radius: 50%; margin-left: auto; }
+
+  /* AVAILABILITY */
+  .avail-col { grid-column: 1; grid-row: 3; }
+  .avail-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px; }
+  .day-col { text-align: center; }
+  .day-label { font-size: 10px; color: #aaa; margin-bottom: 5px; font-weight: 500; }
+  .day-label.today { color: #0F6E56; }
+  .day-slots { display: flex; flex-direction: column; gap: 3px; }
+  .slot { height: 18px; border-radius: 3px; }
+  .slot-busy { background: #9FE1CB; }
+  .slot-today { background: #1D9E75; }
+  .slot-free { background: #f0f0f0; }
+  .manage-btn { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #1D9E75; color: #0F6E56; font-size: 12px; font-weight: 600; background: transparent; cursor: pointer; transition: background 0.15s; }
+  .manage-btn:hover { background: #E1F5EE; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 16 16"><path d="M8 1C4.13 1 1 4.13 1 8s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm0 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 9.5c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      </div>
+      <div>
+        <div class="logo-name">Mindo</div>
+        <div class="logo-sub">Therapy</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M12 2h-1V1h-2v1H7V1H5v1H4a2 2 0 00-2 2v9a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2zm0 11H4V6h8v7zM6 9H4V7h2v2zm3 0H7V7h2v2zm3 0h-2V7h2v2z"/></svg>
+        Appointments
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 5s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>
+        Patients
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 4v3.25l2.5 2.5-1.06 1.06-2.94-2.94V5h1.5z"/></svg>
+        Availability
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3h10v2H1V3zm0 4h10v2H1V7zm0 4h6v2H1v-2zm12-1l2 2-2 2v-1.5h-3v-1h3V6z"/></svg>
+        Earnings
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-2 1a4 4 0 00-4 4v1h12v-1a4 4 0 00-4-4H6z"/></svg>
+        Profile
+      </div>
+    </nav>
+    <div class="logout">
+      <div class="logout-btn">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 2H2v12h4v1.5H.5V.5H6V2zm7 6l-4 4v-2.5H5v-3h4V4l4 4z"/></svg>
+        Sign out
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="header">
+      <div>
+        <div class="greeting-name">Good morning, Dr. Chen</div>
+        <div class="greeting-sub">Tuesday, April 21 &nbsp;·&nbsp; 4 sessions today</div>
+      </div>
+      <div class="header-right">
+        <button class="notif-btn">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v2.586l-1.707 1.707A1 1 0 003 14h14a1 1 0 00.707-1.707L16 10.586V8a6 6 0 00-6-6zm0 16a2 2 0 01-2-2h4a2 2 0 01-2 2z"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="avatar">EC</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- TODAY'S SCHEDULE -->
+      <div class="schedule-col card">
+        <div class="card-title">Today's Schedule</div>
+        <div class="session-list">
+
+          <div class="session-card completed">
+            <div class="time-col"><div class="time-val">9:00</div><div class="time-ap">AM</div></div>
+            <div class="sess-divider"></div>
+            <div class="sess-info">
+              <div class="patient-name">Sarah Mitchell</div>
+              <div class="sess-meta">
+                <span class="sess-type">
+                  <svg viewBox="0 0 12 12" fill="currentColor"><path d="M10 1H2a1 1 0 00-1 1v6a1 1 0 001 1h2l2 2 2-2h2a1 1 0 001-1V2a1 1 0 00-1-1z"/></svg>
+                  Chat session
+                </span>
+                <span class="badge badge-done">Completed</span>
+              </div>
+            </div>
+            <button class="start-btn btn-done">View notes</button>
+          </div>
+
+          <div class="session-card ongoing">
+            <div class="time-col"><div class="time-val">10:30</div><div class="time-ap">AM</div></div>
+            <div class="sess-divider"></div>
+            <div class="sess-info">
+              <div class="patient-name">James Okafor</div>
+              <div class="sess-meta">
+                <span class="sess-type">
+                  <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 1C3.24 1 1 3.24 1 6s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm2.5 5.5l-3 1.5V5l3 1.5z"/></svg>
+                  Video call
+                </span>
+                <span class="badge badge-ongoing">In progress</span>
+              </div>
+            </div>
+            <button class="start-btn btn-active">Rejoin</button>
+          </div>
+
+          <div class="session-card">
+            <div class="time-col"><div class="time-val">1:00</div><div class="time-ap">PM</div></div>
+            <div class="sess-divider"></div>
+            <div class="sess-info">
+              <div class="patient-name">Priya Nair</div>
+              <div class="sess-meta">
+                <span class="sess-type">
+                  <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 1C3.24 1 1 3.24 1 6s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm2.5 5.5l-3 1.5V5l3 1.5z"/></svg>
+                  Video call
+                </span>
+                <span class="badge badge-upcoming">Upcoming</span>
+              </div>
+            </div>
+            <button class="start-btn btn-inactive">Start session</button>
+          </div>
+
+          <div class="session-card">
+            <div class="time-col"><div class="time-val">3:30</div><div class="time-ap">PM</div></div>
+            <div class="sess-divider"></div>
+            <div class="sess-info">
+              <div class="patient-name">Marcus Webb</div>
+              <div class="sess-meta">
+                <span class="sess-type">
+                  <svg viewBox="0 0 12 12" fill="currentColor"><path d="M10 1H2a1 1 0 00-1 1v6a1 1 0 001 1h2l2 2 2-2h2a1 1 0 001-1V2a1 1 0 00-1-1z"/></svg>
+                  Chat session
+                </span>
+                <span class="badge badge-upcoming">Upcoming</span>
+              </div>
+            </div>
+            <button class="start-btn btn-inactive">Start session</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-col">
+
+        <!-- NOTIFICATIONS -->
+        <div class="card">
+          <div class="card-title">Alerts &amp; Notifications</div>
+          <div class="notif-item">
+            <div class="notif-icon ni-blue">
+              <svg viewBox="0 0 14 14" fill="#185FA5"><path d="M7 1a6 6 0 100 12A6 6 0 007 1zm.75 4v3.25l2.5 2.5-1.06 1.06-2.94-2.94V5h1.5z"/></svg>
+            </div>
+            <div>
+              <div class="notif-msg">New booking request from <strong>Aisha Patel</strong> for Thu 24 Apr</div>
+              <div class="notif-time">10 min ago</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-icon ni-teal">
+              <svg viewBox="0 0 14 14" fill="#0F6E56"><path d="M12 1H2a1 1 0 00-1 1v7a1 1 0 001 1h2l3 3 3-3h2a1 1 0 001-1V2a1 1 0 00-1-1z"/></svg>
+            </div>
+            <div>
+              <div class="notif-msg">Message from <strong>Sarah Mitchell</strong> — follow-up notes</div>
+              <div class="notif-time">45 min ago</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-icon ni-amber">
+              <svg viewBox="0 0 14 14" fill="#BA7517"><path d="M7 1L1 12h12L7 1zm0 9.5a.75.75 0 110 1.5.75.75 0 010-1.5zM6.5 6h1v3h-1V6z"/></svg>
+            </div>
+            <div>
+              <div class="notif-msg">System: Platform maintenance Sunday 2–4 AM</div>
+              <div class="notif-time">2 hrs ago</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPCOMING APPOINTMENTS -->
+        <div class="card">
+          <div class="card-title">Upcoming Appointments</div>
+          <div class="appt-row">
+            <div class="appt-date"><div class="appt-dd">23</div><div class="appt-mo">Apr</div></div>
+            <div class="appt-info">
+              <div class="appt-name">Aisha Patel</div>
+              <div class="appt-time">2:00 PM · Video · First session</div>
+            </div>
+            <div class="appt-actions">
+              <button class="mini-btn accept">Accept</button>
+              <button class="mini-btn">Decline</button>
+            </div>
+          </div>
+          <div class="appt-row">
+            <div class="appt-date"><div class="appt-dd">24</div><div class="appt-mo">Apr</div></div>
+            <div class="appt-info">
+              <div class="appt-name">James Okafor</div>
+              <div class="appt-time">10:30 AM · Video</div>
+            </div>
+            <div class="appt-actions">
+              <button class="mini-btn">Reschedule</button>
+            </div>
+          </div>
+          <div class="appt-row">
+            <div class="appt-date"><div class="appt-dd">25</div><div class="appt-mo">Apr</div></div>
+            <div class="appt-info">
+              <div class="appt-name">Priya Nair</div>
+              <div class="appt-time">11:00 AM · Chat</div>
+            </div>
+            <div class="appt-actions">
+              <button class="mini-btn">Reschedule</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end right col -->
+
+      <!-- BOTTOM LEFT: Earnings + Patients -->
+      <div class="bottom-left">
+
+        <!-- EARNINGS -->
+        <div class="card">
+          <div class="card-title">Earnings — April</div>
+          <div class="earn-nums">
+            <div class="e-stat"><div class="e-label">Total earned</div><div class="e-value green">₹38,200</div></div>
+            <div class="e-stat"><div class="e-label">Sessions done</div><div class="e-value">24</div></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-bars" id="bars"></div>
+          </div>
+          <div class="chart-labels"><span>W1</span><span>W2</span><span>W3</span><span>W4</span></div>
+          <button class="withdraw-btn">Withdraw funds</button>
+        </div>
+
+        <!-- PATIENTS -->
+        <div class="card">
+          <div class="card-title">Patient Overview</div>
+          <div class="pat-stats">
+            <div class="pat-stat"><div class="pat-num">31</div><div class="pat-lbl">Active</div></div>
+            <div class="pat-stat"><div class="pat-num">3</div><div class="pat-lbl">New this week</div></div>
+          </div>
+          <div class="patient-row">
+            <div class="p-avatar" style="background:#1D9E75">SM</div>
+            <div><div class="p-name">Sarah Mitchell</div><div class="p-last">Today, 9:00 AM</div></div>
+            <div class="p-dot" style="background:#1D9E75"></div>
+          </div>
+          <div class="patient-row">
+            <div class="p-avatar" style="background:#378ADD">JO</div>
+            <div><div class="p-name">James Okafor</div><div class="p-last">Today, 10:30 AM</div></div>
+            <div class="p-dot" style="background:#1D9E75"></div>
+          </div>
+          <div class="patient-row">
+            <div class="p-avatar" style="background:#7F77DD">PN</div>
+            <div><div class="p-name">Priya Nair</div><div class="p-last">Apr 17</div></div>
+            <div class="p-dot" style="background:#ccc"></div>
+          </div>
+          <div class="patient-row">
+            <div class="p-avatar" style="background:#D85A30">MW</div>
+            <div><div class="p-name">Marcus Webb</div><div class="p-last">Apr 15</div></div>
+            <div class="p-dot" style="background:#ccc"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- AVAILABILITY -->
+      <div class="avail-col card">
+        <div class="card-title">Availability This Week</div>
+        <div class="avail-grid" id="avail-grid"></div>
+        <button class="manage-btn">Manage Availability</button>
+      </div>
+
+    </div><!-- end content -->
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<script>
+  // Earnings bar chart
+  const bars = document.getElementById('bars');
+  const vals = [72, 58, 90, 45];
+  const colors = ['#9FE1CB', '#9FE1CB', '#1D9E75', '#9FE1CB'];
+  vals.forEach((v, i) => {
+    const b = document.createElement('div');
+    b.className = 'bar';
+    b.style.height = v + '%';
+    b.style.background = colors[i];
+    b.title = 'Week ' + (i + 1);
+    bars.appendChild(b);
+  });
+
+  // Availability grid
+  const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const patterns = [
+    [1,1,0,1,0],
+    [1,1,1,1,0],  // today (index 1 = Tuesday)
+    [1,0,1,1,0],
+    [1,1,0,0,0],
+    [1,0,0,0,0],
+    [0,0,0,0,0],
+    [0,0,0,0,0]
+  ];
+  const todayIdx = 1;
+  const grid = document.getElementById('avail-grid');
+  days.forEach((d, i) => {
+    const col = document.createElement('div');
+    col.className = 'day-col';
+    const lbl = document.createElement('div');
+    lbl.className = 'day-label' + (i === todayIdx ? ' today' : '');
+    lbl.textContent = d;
+    col.appendChild(lbl);
+    const slotsEl = document.createElement('div');
+    slotsEl.className = 'day-slots';
+    patterns[i].forEach(s => {
+      const slot = document.createElement('div');
+      if (s && i === todayIdx) slot.className = 'slot slot-today';
+      else if (s) slot.className = 'slot slot-busy';
+      else slot.className = 'slot slot-free';
+      slotsEl.appendChild(slot);
+    });
+    col.appendChild(slotsEl);
+    grid.appendChild(col);
+  });
+
+  // Nav item click
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

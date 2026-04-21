@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Therapy Session — Mindo</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #1c2128;
+    --surface: #252b33;
+    --surface2: #2e3641;
+    --panel: #1e2530;
+    --teal: #1D9E75;
+    --teal-light: #5DCAA5;
+    --teal-dim: rgba(29,158,117,0.15);
+    --blue: #378ADD;
+    --red: #E24B4A;
+    --red-dark: #b83938;
+    --text: #e8edf2;
+    --text-muted: #8a9ab0;
+    --text-dim: #56677a;
+    --border: rgba(255,255,255,0.07);
+    --radius: 12px;
+    --ctrl-size: 48px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── SCREENS ── */
+  .screen { position: fixed; inset: 0; display: flex; flex-direction: column; transition: opacity 0.4s, visibility 0.4s; }
+  .screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  /* ══════════════════════════════════
+     PRE-SESSION SCREEN
+  ══════════════════════════════════ */
+  #pre-screen {
+    background: linear-gradient(135deg, #1a2535 0%, #1c2e28 100%);
+    align-items: center;
+    justify-content: center;
+  }
+  .pre-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 48px;
+    text-align: center;
+    max-width: 460px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .pre-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 28px; }
+  .pre-logo-icon { width: 36px; height: 36px; background: var(--teal); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .pre-logo-icon svg { width: 20px; height: 20px; fill: white; }
+  .pre-logo-name { font-size: 18px; font-weight: 700; color: var(--text); }
+  .pre-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), #085041); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: white; margin: 0 auto 16px; border: 3px solid rgba(29,158,117,0.4); }
+  .pre-therapist { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .pre-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+  .pre-status {
+    background: var(--teal-dim);
+    border: 1px solid rgba(29,158,117,0.3);
+    border-radius: 30px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--teal-light);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 24px;
+  }
+  .pre-status .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--teal-light); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+  .pre-msg { font-size: 15px; color: var(--text-muted); margin-bottom: 32px; line-height: 1.6; }
+  .pre-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-join {
+    padding: 14px 28px;
+    background: var(--teal);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-join:hover { background: #1b8f69; transform: translateY(-1px); }
+  .btn-join svg { width: 18px; height: 18px; fill: white; }
+  .btn-test {
+    padding: 11px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn-test:hover { background: var(--surface2); color: var(--text); }
+  .pre-secure { margin-top: 20px; font-size: 11px; color: var(--text-dim); display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .pre-secure svg { width: 12px; height: 12px; fill: var(--text-dim); }
+
+  /* ══════════════════════════════════
+     SESSION SCREEN
+  ══════════════════════════════════ */
+  #session-screen {
+    flex-direction: row;
+    background: var(--bg);
+  }
+
+  /* Main area */
+  .session-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* Top bar */
+  .top-bar {
+    height: 56px;
+    background: rgba(28,33,40,0.95);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+  .top-left { display: flex; align-items: center; gap: 14px; }
+  .top-logo { display: flex; align-items: center; gap: 8px; }
+  .top-logo-icon { width: 26px; height: 26px; background: var(--teal); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .top-logo-icon svg { width: 14px; height: 14px; fill: white; }
+  .top-logo-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .top-divider { width: 1px; height: 20px; background: var(--border); }
+  .session-info { display: flex; flex-direction: column; }
+  .session-names { font-size: 13px; font-weight: 600; color: var(--text); }
+  .session-type { font-size: 11px; color: var(--text-muted); }
+  .top-center { display: flex; align-items: center; gap: 16px; }
+  .timer-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+  }
+  .conn-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--teal-light);
+    background: var(--teal-dim);
+    border: 1px solid rgba(29,158,117,0.25);
+    border-radius: 20px;
+    padding: 4px 10px;
+  }
+  .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal-light); }
+  .conn-dot.animated { animation: pulse 2s ease-in-out infinite; }
+  .top-right { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    width: 34px; height: 34px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    color: var(--text-muted);
+  }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
+  .icon-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+  /* Video area */
+  .video-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #141820;
+  }
+
+  /* Main video */
+  .main-video {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #141820;
+  }
+  .main-video-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  .main-video-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #1a2535 0%, #1c2e28 50%, #1a2030 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .main-avatar-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), #085041);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    font-weight: 700;
+    color: white;
+    border: 3px solid rgba(29,158,117,0.4);
+  }
+  .main-video-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* Self view */
+  .self-view {
+    position: absolute;
+    bottom: 90px;
+    right: 20px;
+    width: 180px;
+    height: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.1);
+    background: linear-gradient(135deg, #2a3540, #1e2c28);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    z-index: 5;
+  }
+  .self-view:hover { transform: scale(1.03); box-shadow: 0 6px 28px rgba(0,0,0,0.5); }
+  .self-view-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+  }
+  .self-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #378ADD, #185FA5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+  }
+  .self-name {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+  .self-view-label {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .cam-off-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--surface);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cam-off-overlay svg { width: 24px; height: 24px; fill: var(--text-dim); }
+  .cam-off-overlay span { font-size: 10px; color: var(--text-dim); }
+  .cam-off-overlay.show { display: flex; }
+
+  /* Mute indicator on main video */
+  .mute-indicator {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(0,0,0,0.55);
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+  .mute-indicator svg { width: 14px; height: 14px; fill: #E24B4A; }
+  .mute-indicator.show { display: flex; }
+
+  /* View toggle */
+  .view-toggle {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    background: rgba(0,0,0,0.45);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    z-index: 5;
+  }
+  .view-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s, color 0.15s;
+    border: none;
+    background: transparent;
+  }
+  .view-btn svg { width: 13px; height: 13px; fill: currentColor; }
+  .view-btn.active { background: var(--teal); color: white; }
+  .view-btn:not(.active):hover { background: rgba(255,255,255,0.07); color: var(--text); }
+
+  /* Controls bar */
+  .controls-bar {
+    height: 78px;
+    background: rgba(28,33,40,0.97);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 20px;
+    flex-shrink: 0;
+    backdrop-filter: blur(10px);
+  }
+  .ctrl-btn {
+    width: var(--ctrl-size);
+    height: var(--ctrl-size);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s, transform 0.12s;
+    position: relative;
+  }
+  .ctrl-btn:hover { transform: scale(1.08); }
+  .ctrl-btn:active { transform: scale(0.96); }
+  .ctrl-btn svg { width: 20px; height: 20px; fill: currentColor; pointer-events: none; }
+  .ctrl-btn .tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.75);
+    color: white;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .ctrl-btn:hover .tooltip { opacity: 1; }
+  .ctrl-normal { background: var(--surface2); color: var(--text); }
+  .ctrl-normal:hover { background: #374150; }
+  .ctrl-active { background: rgba(226,75,74,0.18); color: #E24B4A; }
+  .ctrl-active:hover { background: rgba(226,75,74,0.28); }
+  .ctrl-end {
+    background: var(--red);
+    color: white;
+    width: 54px;
+    height: 54px;
+    margin: 0 6px;
+  }
+  .ctrl-end:hover { background: var(--red-dark); }
+  .ctrl-separator { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
+
+  /* ── PANEL ── */
+  .side-panel {
+    width: 320px;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.3s ease, opacity 0.3s;
+    overflow: hidden;
+  }
+  .side-panel.collapsed { width: 0; opacity: 0; }
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-tab {
+    flex: 1;
+    padding: 14px 0;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .panel-tab.active { color: var(--teal-light); border-bottom-color: var(--teal); }
+  .panel-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+  .tab-pane { display: none; flex: 1; flex-direction: column; min-height: 0; }
+  .tab-pane.active { display: flex; }
+
+  /* Chat */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface2) transparent;
+  }
+  .chat-msg { display: flex; flex-direction: column; gap: 3px; }
+  .chat-msg.me { align-items: flex-end; }
+  .chat-bubble {
+    max-width: 220px;
+    padding: 9px 13px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .chat-msg.them .chat-bubble { background: var(--surface2); border-bottom-left-radius: 4px; }
+  .chat-msg.me .chat-bubble { background: var(--teal); border-bottom-right-radius: 4px; }
+  .chat-sender { font-size: 10px; color: var(--text-dim); padding: 0 4px; }
+  .chat-time { font-size: 10px; color: var(--text-dim); }
+  .system-msg {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 5px 12px;
+    align-self: center;
+  }
+  .chat-input-wrap {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text);
+    resize: none;
+    min-height: 38px;
+    max-height: 100px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+    scrollbar-width: none;
+  }
+  .chat-input:focus { border-color: rgba(29,158,117,0.5); }
+  .chat-input::placeholder { color: var(--text-dim); }
+  .chat-send {
+    width: 36px;
+    height: 36px;
+    background: var(--teal);
+    border: none;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .chat-send:hover { background: #1b8f69; }
+  .chat-send svg { width: 16px; height: 16px; fill: white; }
+
+  /* Notes */
+  .notes-pad {
+    flex: 1;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
+  .notes-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .notes-label svg { width: 12px; height: 12px; fill: var(--text-dim); }
+  .notes-textarea {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface2) transparent;
+  }
+  .notes-textarea:focus { border-color: rgba(29,158,117,0.5); }
+  .notes-textarea::placeholder { color: var(--text-dim); }
+  .notes-save {
+    padding: 9px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .notes-save:hover { background: var(--surface2); color: var(--text); }
+
+  /* Resources */
+  .resources-pad { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow-y: auto; }
+  .resource-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .resource-item:hover { border-color: rgba(29,158,117,0.4); }
+  .resource-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--teal-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .resource-icon svg { width: 16px; height: 16px; fill: var(--teal-light); }
+  .resource-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .resource-meta { font-size: 11px; color: var(--text-dim); }
+  .resource-add {
+    padding: 9px 14px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    color: var(--text-dim);
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+  }
+  .resource-add:hover { border-color: var(--teal-light); color: var(--teal-light); }
+  .resource-add svg { width: 14px; height: 14px; fill: currentColor; }
+
+  /* ══════════════════════════════════
+     POST-SESSION SCREEN
+  ══════════════════════════════════ */
+  #post-screen {
+    background: linear-gradient(135deg, #1a2535 0%, #1c2e28 100%);
+    align-items: center;
+    justify-content: center;
+  }
+  .post-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 48px;
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .post-icon {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: var(--teal-dim);
+    border: 2px solid rgba(29,158,117,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .post-icon svg { width: 32px; height: 32px; fill: var(--teal-light); }
+  .post-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .post-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+  .post-duration {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .post-duration span { color: var(--text); font-weight: 600; }
+  .feedback-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+  .stars { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+  .star { font-size: 28px; cursor: pointer; color: var(--text-dim); transition: color 0.15s, transform 0.12s; }
+  .star:hover, .star.active { color: #EF9F27; transform: scale(1.15); }
+  .feedback-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: inherit;
+    resize: none;
+    height: 80px;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.15s;
+  }
+  .feedback-textarea:focus { border-color: rgba(29,158,117,0.5); }
+  .feedback-textarea::placeholder { color: var(--text-dim); }
+  .post-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-book {
+    padding: 13px 24px;
+    background: var(--teal);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-book:hover { background: #1b8f69; }
+  .btn-book svg { width: 16px; height: 16px; fill: white; }
+  .btn-dismiss {
+    padding: 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-dismiss:hover { background: var(--surface2); }
+
+  /* Settings modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+  .modal-overlay.show { opacity: 1; visibility: visible; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 360px;
+    max-width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    transform: translateY(10px);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.show .modal { transform: translateY(0); }
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  .modal-close { width: 28px; height: 28px; background: var(--surface2); border: none; border-radius: 6px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .modal-close svg { width: 14px; height: 14px; fill: currentColor; }
+  .setting-group { margin-bottom: 18px; }
+  .setting-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .setting-select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    font-family: inherit;
+  }
+  .setting-select:focus { border-color: rgba(29,158,117,0.5); }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .side-panel { display: none; }
+    .top-center { gap: 8px; }
+    .conn-status span { display: none; }
+    .session-type { display: none; }
+    .self-view { width: 120px; height: 80px; bottom: 85px; }
+    .controls-bar { gap: 6px; }
+    .ctrl-btn { --ctrl-size: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════ PRE-SESSION ════════ -->
+<div id="pre-screen" class="screen">
+  <div class="pre-card">
+    <div class="pre-logo">
+      <div class="pre-logo-icon">
+        <svg viewBox="0 0 16 16"><path d="M8 1C4.13 1 1 4.13 1 8s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm0 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 9.5c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      </div>
+      <div class="pre-logo-name">Mindo Therapy</div>
+    </div>
+    <div class="pre-avatar">EC</div>
+    <div class="pre-therapist">Dr. Emily Chen</div>
+    <div class="pre-subtitle">Licensed Clinical Psychologist · CBT Specialist</div>
+    <div class="pre-status">
+      <span class="pulse"></span>
+      Therapist is ready
+    </div>
+    <div class="pre-msg">Your session is scheduled for today at 10:30 AM. Take a moment to find a quiet, comfortable place before joining.</div>
+    <div class="pre-actions">
+      <button class="btn-join" onclick="startSession()">
+        <svg viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm12.553 1.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/></svg>
+        Join Now
+      </button>
+      <button class="btn-test">Test audio &amp; video</button>
+    </div>
+    <div class="pre-secure">
+      <svg viewBox="0 0 16 16"><path d="M8 1L2 3.5V8c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V3.5L8 1zm0 6a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm-1 4h2v1H7v-1z"/></svg>
+      End-to-end encrypted · HIPAA compliant
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SESSION ════════ -->
+<div id="session-screen" class="screen hidden">
+
+  <!-- Main column -->
+  <div class="session-main">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <div class="top-left">
+        <div class="top-logo">
+          <div class="top-logo-icon">
+            <svg viewBox="0 0 16 16"><path d="M8 1C4.13 1 1 4.13 1 8s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm0 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 9.5c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+          </div>
+          <div class="top-logo-name">Mindo</div>
+        </div>
+        <div class="top-divider"></div>
+        <div class="session-info">
+          <div class="session-names">Dr. Emily Chen &amp; Alex Turner</div>
+          <div class="session-type">Individual Therapy · Video Session</div>
+        </div>
+      </div>
+      <div class="top-center">
+        <div class="timer-wrap" id="timer">00:00:00</div>
+        <div class="conn-status">
+          <div class="conn-dot animated"></div>
+          <span>Secure connection</span>
+        </div>
+      </div>
+      <div class="top-right">
+        <div class="icon-btn" title="Encryption info">
+          <svg viewBox="0 0 16 16"><path d="M8 1L2 3.5V8c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V3.5L8 1zm0 6a1.5 1.5 0 110 3 1.5 1.5 0 010-3z"/></svg>
+        </div>
+        <div class="icon-btn" id="panel-toggle" title="Toggle panel" onclick="togglePanel()">
+          <svg viewBox="0 0 16 16"><path d="M2 4h12v1.5H2V4zm0 3.25h12v1.5H2v-1.5zm0 3.25h8v1.5H2V10.5z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video area -->
+    <div class="video-area">
+
+      <!-- Main video -->
+      <div class="main-video">
+        <div class="main-video-inner">
+          <div class="main-video-bg" id="main-video-bg">
+            <div class="main-avatar-large">EC</div>
+            <div class="main-video-name">Dr. Emily Chen</div>
+          </div>
+          <div class="mute-indicator" id="self-mute-indicator">
+            <svg viewBox="0 0 16 16"><path d="M13.86 10.47a6 6 0 01-5.86 2.5v2h2v1.5H6v-1.5h2v-2a6 6 0 01-5.86-8.5l1.3 1.3A4.5 4.5 0 008 13a4.5 4.5 0 004.5-4.5V8l1.36 1.36zM8 1a3 3 0 013 3v4a3 3 0 01-.14.9l1.1 1.1A4.5 4.5 0 0013 8V4a5 5 0 00-9.65-1.85l1.1 1.1A3 3 0 018 1zm-5 7.07V8a5 5 0 001.5 3.54l-1.05 1.05A6.5 6.5 0 011.5 8v-.93L3 8.07zm10 6.22l-12-12L2.07 2 14.93 14.86 13 15.29z"/></svg>
+            Muted
+          </div>
+        </div>
+      </div>
+
+      <!-- View toggle -->
+      <div class="view-toggle">
+        <button class="view-btn active" id="focus-btn" onclick="setView('focus')">
+          <svg viewBox="0 0 13 13"><rect x="1" y="1" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          Focus
+        </button>
+        <button class="view-btn" id="grid-btn" onclick="setView('grid')">
+          <svg viewBox="0 0 13 13"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="7" y="1" width="5" height="5" rx="1"/><rect x="1" y="7" width="5" height="5" rx="1"/><rect x="7" y="7" width="5" height="5" rx="1"/></svg>
+          Grid
+        </button>
+      </div>
+
+      <!-- Self view -->
+      <div class="self-view" id="self-view">
+        <div class="self-view-inner">
+          <div class="self-avatar">AT</div>
+          <div class="self-name">You</div>
+          <div class="self-view-label">You</div>
+        </div>
+        <div class="cam-off-overlay" id="cam-off-overlay">
+          <svg viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414l-1.72 1.72A4 4 0 0115 10v4a2 2 0 01-2 2H7a2 2 0 01-1.965-1.621L4.293 15.12A1 1 0 012.88 13.7L4 12.586V10a4 4 0 01.717-2.29L2.879 5.707a1 1 0 010-1.414z"/><path d="M8 6a2 2 0 012-2 2 2 0 011.732 1l-3.716 3.716A2 2 0 018 8V6z"/></svg>
+          <span>Camera off</span>
+        </div>
+      </div>
+
+    </div><!-- end video-area -->
+
+    <!-- Controls -->
+    <div class="controls-bar">
+
+      <button class="ctrl-btn ctrl-normal" id="mic-btn" onclick="toggleMic()" title="Toggle mic">
+        <span class="tooltip" id="mic-tooltip">Mute</span>
+        <svg id="mic-icon" viewBox="0 0 20 20"><path d="M10 1a4 4 0 00-4 4v5a4 4 0 008 0V5a4 4 0 00-4-4zm-6 9a6 6 0 0011.9-1H17a7 7 0 01-13.9 1H4zm6 7h-2v-1.93A7 7 0 003.07 9H5a5 5 0 009.9-1H17a7 7 0 01-6.07 6.93V17h-1z"/></svg>
+      </button>
+
+      <button class="ctrl-btn ctrl-normal" id="cam-btn" onclick="toggleCam()" title="Toggle camera">
+        <span class="tooltip" id="cam-tooltip">Turn off camera</span>
+        <svg id="cam-icon" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm12.553 1.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/></svg>
+      </button>
+
+      <div class="ctrl-separator"></div>
+
+      <button class="ctrl-btn ctrl-end" onclick="endCall()" title="End call">
+        <span class="tooltip">End call</span>
+        <svg viewBox="0 0 20 20"><path d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5H15C7.82 18 2 12.18 2 5V3.5z" transform="rotate(135 10 10)"/></svg>
+      </button>
+
+      <div class="ctrl-separator"></div>
+
+      <button class="ctrl-btn ctrl-normal" onclick="togglePanel()" title="Chat">
+        <span class="tooltip">Chat</span>
+        <svg viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/><path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/></svg>
+      </button>
+
+      <button class="ctrl-btn ctrl-normal" id="hand-btn" onclick="toggleHand()" title="Raise hand">
+        <span class="tooltip" id="hand-tooltip">Raise hand</span>
+        <svg viewBox="0 0 20 20"><path d="M9 3a1 1 0 012 0v5h1a1 1 0 011 1v2a4 4 0 01-4 4H8a4 4 0 01-4-4V7a1 1 0 112 0v3a1 1 0 001 1 1 1 0 001-1V4a1 1 0 011-1z"/></svg>
+      </button>
+
+      <button class="ctrl-btn ctrl-normal" onclick="openSettings()" title="Settings">
+        <span class="tooltip">Settings</span>
+        <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+      </button>
+
+    </div>
+
+  </div><!-- end session-main -->
+
+  <!-- Side panel -->
+  <div class="side-panel" id="side-panel">
+    <div class="panel-tabs">
+      <div class="panel-tab active" onclick="switchTab('chat')">Chat</div>
+      <div class="panel-tab" onclick="switchTab('notes')">Notes</div>
+      <div class="panel-tab" onclick="switchTab('resources')">Resources</div>
+    </div>
+    <div class="panel-content">
+
+      <!-- Chat tab -->
+      <div class="tab-pane active" id="tab-chat">
+        <div class="chat-messages" id="chat-messages">
+          <div class="system-msg">Session started · End-to-end encrypted</div>
+          <div class="chat-msg them">
+            <div class="chat-sender">Dr. Emily Chen</div>
+            <div class="chat-bubble">Hi Alex, welcome. How are you feeling today?</div>
+            <div class="chat-time">10:31 AM</div>
+          </div>
+          <div class="chat-msg me">
+            <div class="chat-bubble">A bit nervous but okay. Thanks for asking.</div>
+            <div class="chat-time">10:31 AM</div>
+          </div>
+          <div class="chat-msg them">
+            <div class="chat-sender">Dr. Emily Chen</div>
+            <div class="chat-bubble">That's completely normal. Let's take it slow — there's no rush today.</div>
+            <div class="chat-time">10:32 AM</div>
+          </div>
+        </div>
+        <div class="chat-input-wrap">
+          <textarea class="chat-input" id="chat-input" placeholder="Type a message…" rows="1" onkeydown="handleChatKey(event)"></textarea>
+          <button class="chat-send" onclick="sendMessage()">
+            <svg viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Notes tab -->
+      <div class="tab-pane" id="tab-notes">
+        <div class="notes-pad">
+          <div class="notes-label">
+            <svg viewBox="0 0 16 16"><path d="M11 1H3a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V4l-3-3zm-1 1.5L12.5 5H10V2.5zM4 13V7h8v6H4zm0-8h4V3H4v2z"/></svg>
+            Private notes — only visible to you
+          </div>
+          <textarea class="notes-textarea" placeholder="Write your private notes here…">Patient seems anxious today — breathing exercises may help.&#10;Follow up on sleep patterns from last session.</textarea>
+          <button class="notes-save">Save notes</button>
+        </div>
+      </div>
+
+      <!-- Resources tab -->
+      <div class="tab-pane" id="tab-resources">
+        <div class="resources-pad">
+          <div class="resource-item">
+            <div class="resource-icon">
+              <svg viewBox="0 0 16 16"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1zm1 3v1.5h6V5H5zm0 3v1.5h6V8H5zm0 3v1.5h4V11H5z"/></svg>
+            </div>
+            <div>
+              <div class="resource-name">Breathing Exercises</div>
+              <div class="resource-meta">PDF · Shared by therapist</div>
+            </div>
+          </div>
+          <div class="resource-item">
+            <div class="resource-icon">
+              <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 4v3.25l2.5 2.5-1.06 1.06-2.94-2.94V5h1.5z"/></svg>
+            </div>
+            <div>
+              <div class="resource-name">Mindfulness Guide</div>
+              <div class="resource-meta">Link · mindfulness.org</div>
+            </div>
+          </div>
+          <button class="resource-add">
+            <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Share a resource
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- end session-screen -->
+
+<!-- ════════ POST-SESSION ════════ -->
+<div id="post-screen" class="screen hidden">
+  <div class="post-card">
+    <div class="post-icon">
+      <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    </div>
+    <div class="post-title">Session Completed</div>
+    <div class="post-sub">Thank you for joining today's session, Alex.</div>
+    <div class="post-duration">
+      <div>Duration</div><span id="post-duration">00:00</span>
+      <div>Sessions this month</div><span>4</span>
+    </div>
+    <div class="feedback-label">How was your session?</div>
+    <div class="stars" id="stars">
+      <span class="star" onclick="rateStar(1)">★</span>
+      <span class="star" onclick="rateStar(2)">★</span>
+      <span class="star" onclick="rateStar(3)">★</span>
+      <span class="star" onclick="rateStar(4)">★</span>
+      <span class="star" onclick="rateStar(5)">★</span>
+    </div>
+    <textarea class="feedback-textarea" placeholder="Optional: share any thoughts about your session…"></textarea>
+    <div class="post-actions">
+      <button class="btn-book">
+        <svg viewBox="0 0 20 20"><path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/></svg>
+        Book Next Session
+      </button>
+      <button class="btn-dismiss" onclick="location.reload()">Return to dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal" onclick="closeSettingsOutside(event)">
+  <div class="modal">
+    <div class="modal-title">
+      Audio &amp; Video Settings
+      <button class="modal-close" onclick="closeSettings()">
+        <svg viewBox="0 0 14 14"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="setting-group">
+      <div class="setting-label">Microphone</div>
+      <select class="setting-select">
+        <option>Default — Built-in Microphone</option>
+        <option>External USB Mic</option>
+        <option>AirPods Pro</option>
+      </select>
+    </div>
+    <div class="setting-group">
+      <div class="setting-label">Speaker</div>
+      <select class="setting-select">
+        <option>Default — Built-in Speaker</option>
+        <option>External Speaker</option>
+        <option>AirPods Pro</option>
+      </select>
+    </div>
+    <div class="setting-group">
+      <div class="setting-label">Camera</div>
+      <select class="setting-select">
+        <option>Default — FaceTime HD Camera</option>
+        <option>External Webcam</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let micOn = true, camOn = true, handRaised = false;
+  let panelOpen = true;
+  let seconds = 0;
+  let timerInterval = null;
+  let activeTab = 'chat';
+
+  // ── TIMER ──
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      seconds++;
+      const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = h + ':' + m + ':' + s;
+    }, 1000);
+  }
+
+  // ── SCREENS ──
+  function startSession() {
+    document.getElementById('pre-screen').classList.add('hidden');
+    document.getElementById('session-screen').classList.remove('hidden');
+    startTimer();
+    scrollChat();
+  }
+
+  function endCall() {
+    if (!confirm('Are you sure you want to end this session?')) return;
+    clearInterval(timerInterval);
+    const total = seconds;
+    const m = String(Math.floor(total / 60)).padStart(2,'0');
+    const s = String(total % 60).padStart(2,'0');
+    document.getElementById('post-duration').textContent = m + ':' + s;
+    document.getElementById('session-screen').classList.add('hidden');
+    document.getElementById('post-screen').classList.remove('hidden');
+  }
+
+  // ── CONTROLS ──
+  function toggleMic() {
+    micOn = !micOn;
+    const btn = document.getElementById('mic-btn');
+    const tooltip = document.getElementById('mic-tooltip');
+    const indicator = document.getElementById('self-mute-indicator');
+    if (micOn) {
+      btn.className = 'ctrl-btn ctrl-normal';
+      tooltip.textContent = 'Mute';
+      indicator.classList.remove('show');
+      document.getElementById('mic-icon').innerHTML = '<path d="M10 1a4 4 0 00-4 4v5a4 4 0 008 0V5a4 4 0 00-4-4zm-6 9a6 6 0 0011.9-1H17a7 7 0 01-13.9 1H4zm6 7h-2v-1.93A7 7 0 013.07 9H5a5 5 0 009.9-1H17a7 7 0 01-6.07 6.93V17h-1z"/>';
+    } else {
+      btn.className = 'ctrl-btn ctrl-active';
+      tooltip.textContent = 'Unmute';
+      indicator.classList.add('show');
+      document.getElementById('mic-icon').innerHTML = '<path d="M13.86 10.47a6 6 0 01-5.86 2.5v2h2v1.5H6v-1.5h2v-2a6 6 0 01-5.86-8.5l1.3 1.3A4.5 4.5 0 008 13a4.5 4.5 0 004.5-4.5V8l1.36 1.36zM8 1a3 3 0 013 3v4a3 3 0 01-.14.9l1.1 1.1A4.5 4.5 0 0013 8V4a5 5 0 00-9.65-1.85l1.1 1.1A3 3 0 018 1zm-5 7.07V8a5 5 0 001.5 3.54l-1.05 1.05A6.5 6.5 0 011.5 8v-.93L3 8.07zm10 6.22l-12-12L2.07 2 14.93 14.86 13 15.29z"/>';
+    }
+  }
+
+  function toggleCam() {
+    camOn = !camOn;
+    const btn = document.getElementById('cam-btn');
+    const tooltip = document.getElementById('cam-tooltip');
+    const overlay = document.getElementById('cam-off-overlay');
+    if (camOn) {
+      btn.className = 'ctrl-btn ctrl-normal';
+      tooltip.textContent = 'Turn off camera';
+      overlay.classList.remove('show');
+      document.getElementById('cam-icon').innerHTML = '<path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm12.553 1.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/>';
+    } else {
+      btn.className = 'ctrl-btn ctrl-active';
+      tooltip.textContent = 'Turn on camera';
+      overlay.classList.add('show');
+      document.getElementById('cam-icon').innerHTML = '<path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414l-1.72 1.72A4 4 0 0115 10v4a2 2 0 01-2 2H7a2 2 0 01-1.965-1.621L4.293 15.12A1 1 0 012.88 13.7L4 12.586V10a4 4 0 01.717-2.29L2.879 5.707a1 1 0 010-1.414z"/><path d="M8 6a2 2 0 012-2 2 2 0 011.732 1l-3.716 3.716A2 2 0 018 8V6z"/>';
+    }
+  }
+
+  function toggleHand() {
+    handRaised = !handRaised;
+    const btn = document.getElementById('hand-btn');
+    const tooltip = document.getElementById('hand-tooltip');
+    if (handRaised) {
+      btn.className = 'ctrl-btn ctrl-active';
+      tooltip.textContent = 'Lower hand';
+      btn.style.color = '#EF9F27';
+      btn.style.background = 'rgba(239,159,39,0.15)';
+    } else {
+      btn.className = 'ctrl-btn ctrl-normal';
+      btn.style.color = '';
+      btn.style.background = '';
+      tooltip.textContent = 'Raise hand';
+    }
+  }
+
+  // ── PANEL ──
+  function togglePanel() {
+    panelOpen = !panelOpen;
+    document.getElementById('side-panel').classList.toggle('collapsed', !panelOpen);
+  }
+
+  // ── TABS ──
+  function switchTab(name) {
+    activeTab = name;
+    document.querySelectorAll('.panel-tab').forEach((t, i) => {
+      t.classList.toggle('active', ['chat','notes','resources'][i] === name);
+    });
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'chat') scrollChat();
+  }
+
+  // ── CHAT ──
+  function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    const msgs = document.getElementById('chat-messages');
+    const now = new Date();
+    const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+    const div = document.createElement('div');
+    div.className = 'chat-msg me';
+    div.innerHTML = '<div class="chat-bubble">' + escHtml(text) + '</div><div class="chat-time">' + time + '</div>';
+    msgs.appendChild(div);
+    input.value = '';
+    input.style.height = 'auto';
+    scrollChat();
+    // Simulated reply
+    setTimeout(() => {
+      const reply = document.createElement('div');
+      reply.className = 'chat-msg them';
+      reply.innerHTML = '<div class="chat-sender">Dr. Emily Chen</div><div class="chat-bubble">Thank you for sharing that with me.</div><div class="chat-time">' + time + '</div>';
+      msgs.appendChild(reply);
+      scrollChat();
+    }, 1800);
+  }
+
+  function handleChatKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  }
+
+  function scrollChat() {
+    const msgs = document.getElementById('chat-messages');
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── VIEW ──
+  function setView(mode) {
+    document.getElementById('focus-btn').classList.toggle('active', mode === 'focus');
+    document.getElementById('grid-btn').classList.toggle('active', mode === 'grid');
+    const sv = document.getElementById('self-view');
+    if (mode === 'grid') {
+      sv.style.width = '45%'; sv.style.height = '45%';
+      sv.style.bottom = '90px'; sv.style.right = '50%';
+      sv.style.transform = 'translateX(50%)';
+    } else {
+      sv.style.width = ''; sv.style.height = '';
+      sv.style.bottom = '90px'; sv.style.right = '20px';
+      sv.style.transform = '';
+    }
+  }
+
+  // ── SETTINGS ──
+  function openSettings() {
+    document.getElementById('settings-modal').classList.add('show');
+  }
+  function closeSettings() {
+    document.getElementById('settings-modal').classList.remove('show');
+  }
+  function closeSettingsOutside(e) {
+    if (e.target === document.getElementById('settings-modal')) closeSettings();
+  }
+
+  // ── RATING ──
+  function rateStar(n) {
+    document.querySelectorAll('.star').forEach((s, i) => {
+      s.classList.toggle('active', i < n);
+    });
+  }
+
+  // ── KEYBOARD ──
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('session-screen').classList.contains('hidden')) return;
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+    if (e.key === 'm' || e.key === 'M') toggleMic();
+    if (e.key === 'v' || e.key === 'V') toggleCam();
+  });
+</script>
+</body>
+</html>

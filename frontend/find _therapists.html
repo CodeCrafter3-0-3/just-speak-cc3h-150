@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find a Therapist — Just-Speak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Lora:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & TOKENS ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --mint:       #3a9e72;
+  --mint-lt:    #d8f0e6;
+  --mint-mid:   #8ecfad;
+  --sky:        #4a9abf;
+  --sky-lt:     #dff0f7;
+  --cream:      #f7faf8;
+  --sage:       #edf4f0;
+  --white:      #ffffff;
+  --ink:        #172920;
+  --ink-2:      #3a5246;
+  --muted:      #6b8c7a;
+  --border:     rgba(58,158,114,0.16);
+  --border-2:   rgba(58,158,114,0.28);
+  --shadow:     0 2px 12px rgba(23,41,32,0.07);
+  --shadow-lg:  0 8px 32px rgba(23,41,32,0.12);
+  --font-serif: 'Lora', Georgia, serif;
+  --font-body:  'DM Sans', sans-serif;
+  --ease:       cubic-bezier(0.25,0.46,0.45,0.94);
+  --header-h:   68px;
+  --sidebar-w:  268px;
+  --radius:     14px;
+  --radius-sm:  9px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--mint-mid); border-radius: 99px; }
+
+/* ─── HEADER ─── */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--header-h);
+  background: rgba(247,250,248,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 1.75rem;
+  gap: 1.25rem;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--ink);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.logo-dot {
+  width: 9px; height: 9px;
+  background: var(--mint);
+  border-radius: 50%;
+  animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.35);opacity:.65}
+}
+
+.search-wrap {
+  flex: 1;
+  max-width: 520px;
+  margin: 0 auto;
+  position: relative;
+}
+.search-icon {
+  position: absolute; left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); font-size: .9rem; pointer-events: none;
+  transition: color .2s;
+}
+#searchInput {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  border: 1.5px solid var(--border-2);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: .88rem;
+  color: var(--ink);
+  background: var(--white);
+  outline: none;
+  transition: border-color .25s, box-shadow .25s;
+}
+#searchInput::placeholder { color: #a0bcac; }
+#searchInput:focus {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 3px rgba(58,158,114,.1);
+}
+#searchInput:focus ~ .search-icon { color: var(--mint); }
+
+.header-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
+.hdr-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-2);
+  background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem; cursor: pointer; color: var(--muted);
+  transition: background .2s, color .2s;
+}
+.hdr-btn:hover { background: var(--mint-lt); color: var(--mint); }
+.profile-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--mint-mid), #b8ddf0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; font-weight: 500;
+  color: var(--ink); cursor: pointer;
+  border: 2px solid var(--white);
+  box-shadow: 0 0 0 1.5px var(--mint-mid);
+}
+
+/* ─── FILTER TOGGLE (mobile) ─── */
+.filter-toggle-btn {
+  display: none;
+  align-items: center; gap: 7px;
+  padding: 9px 16px;
+  background: var(--white);
+  border: 1.5px solid var(--border-2);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: .82rem; font-weight: 500;
+  color: var(--ink-2); cursor: pointer;
+  transition: background .2s;
+  margin: 1rem 1.25rem .25rem;
+}
+.filter-toggle-btn:hover { background: var(--mint-lt); }
+
+/* ─── PAGE BODY ─── */
+.page-body {
+  display: flex;
+  align-items: flex-start;
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem;
+  gap: 1.5rem;
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  position: sticky;
+  top: calc(var(--header-h) + 1.75rem);
+  max-height: calc(100vh - var(--header-h) - 3.5rem);
+  overflow-y: auto;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.25rem;
+  box-shadow: var(--shadow);
+  transition: transform .35s var(--ease);
+}
+
+.sidebar-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.4rem;
+}
+.sidebar-title {
+  font-family: var(--font-serif);
+  font-size: 1rem; font-weight: 500; color: var(--ink);
+}
+.clear-btn {
+  font-size: .73rem; color: var(--mint);
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-body); font-weight: 500;
+  transition: color .2s;
+}
+.clear-btn:hover { color: var(--ink); }
+
+/* filter section */
+.filter-section { margin-bottom: 1.5rem; }
+.filter-label {
+  font-size: .68rem; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: .65rem;
+  display: block;
+}
+.check-item {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 8px; cursor: pointer;
+}
+.check-item input[type="checkbox"] {
+  width: 17px; height: 17px;
+  accent-color: var(--mint);
+  cursor: pointer; flex-shrink: 0;
+}
+.check-item span { font-size: .85rem; color: var(--ink-2); }
+
+/* language select */
+select#langFilter {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: .85rem; color: var(--ink);
+  background: var(--cream); outline: none;
+  cursor: pointer;
+  transition: border-color .2s;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b8c7a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+select#langFilter:focus { border-color: var(--mint); }
+
+/* price slider */
+.slider-wrap { position: relative; padding: 4px 0; }
+#priceSlider {
+  width: 100%; height: 4px;
+  -webkit-appearance: none; appearance: none;
+  background: linear-gradient(to right, var(--mint) 0%, var(--mint) 60%, #cde4d9 60%);
+  border-radius: 99px; outline: none; cursor: pointer;
+  transition: background .15s;
+}
+#priceSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 2.5px solid var(--mint);
+  box-shadow: 0 2px 6px rgba(58,158,114,.25);
+  cursor: pointer; transition: transform .15s;
+}
+#priceSlider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.slider-labels {
+  display: flex; justify-content: space-between;
+  font-size: .72rem; color: var(--muted); margin-top: 7px;
+}
+.slider-val { font-weight: 500; color: var(--mint); }
+
+/* rating */
+.star-check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.star-check input { accent-color: var(--mint); width: 17px; height: 17px; cursor: pointer; }
+.stars-display { color: #f5a623; font-size: .95rem; letter-spacing: 1px; }
+.star-check .star-label { font-size: .82rem; color: var(--ink-2); }
+
+/* availability pills */
+.avail-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.avail-pill {
+  padding: 8px 15px;
+  border: 1.5px solid var(--border-2);
+  border-radius: 50px;
+  font-size: .78rem; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  background: var(--cream);
+  transition: all .2s var(--ease);
+  user-select: none;
+}
+.avail-pill.active {
+  border-color: var(--mint);
+  background: var(--mint-lt);
+  color: var(--mint);
+}
+
+/* ─── MAIN CONTENT ─── */
+.main-content { flex: 1; min-width: 0; }
+
+.results-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;
+}
+.results-count {
+  font-size: .85rem; color: var(--muted);
+  font-weight: 300;
+}
+.results-count strong { color: var(--ink); font-weight: 500; }
+
+.sort-select {
+  padding: 8px 30px 8px 12px;
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: .82rem; color: var(--ink);
+  background: var(--white);
+  outline: none; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b8c7a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color .2s;
+}
+.sort-select:focus { border-color: var(--mint); }
+
+/* cards grid */
+#therapistGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* therapist card */
+.t-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  animation: fadeUp .4s var(--ease) both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(16px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.t-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-top {
+  position: relative;
+  padding: 1.25rem 1.25rem .9rem;
+  background: linear-gradient(160deg, var(--sage) 0%, var(--sky-lt) 100%);
+  display: flex; align-items: center; gap: 13px;
+}
+.avail-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-size: .65rem; font-weight: 500;
+  padding: 4px 10px; border-radius: 20px;
+  letter-spacing: .04em;
+}
+.avail-badge.online  { background: var(--mint-lt); color: var(--mint); }
+.avail-badge.today   { background: #fff3e0; color: #d4700a; }
+.avail-badge.limited { background: #ffe8e8; color: #c04040; }
+
+.avatar-ring {
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  background: var(--white);
+  padding: 3px;
+  box-shadow: 0 2px 8px rgba(58,158,114,.15);
+  flex-shrink: 0;
+}
+.avatar-ring img {
+  width: 100%; height: 100%;
+  border-radius: 50%; object-fit: cover;
+  display: block;
+}
+.avatar-initials {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--mint-mid), #a8d8ee);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 500; color: var(--ink);
+}
+
+.top-meta { flex: 1; min-width: 0; }
+.t-name {
+  font-family: var(--font-serif);
+  font-size: .95rem; font-weight: 500;
+  color: var(--ink); line-height: 1.25;
+}
+.t-qual { font-size: .73rem; color: var(--ink-2); font-weight: 300; margin-bottom: 6px; }
+.rating-row { display: flex; align-items: center; gap: 5px; }
+.stars { color: #f5a623; font-size: .78rem; }
+.rating-num { font-size: .78rem; font-weight: 500; color: var(--ink); }
+.review-ct  { font-size: .7rem; color: var(--muted); }
+
+.card-body { padding: .9rem 1.25rem; flex: 1; }
+.spec-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: .75rem; }
+.spec-tag {
+  font-size: .67rem; font-weight: 500;
+  padding: 3px 9px; border-radius: 20px;
+  background: var(--mint-lt); color: var(--mint);
+  letter-spacing: .02em;
+}
+
+.card-meta-row {
+  display: flex; gap: 1rem;
+  margin-bottom: .65rem;
+}
+.meta-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: .75rem; color: var(--muted);
+}
+.meta-icon { font-size: .8rem; }
+.meta-val { font-weight: 500; color: var(--ink-2); }
+
+.lang-row { display: flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--muted); }
+.lang-tag {
+  font-size: .67rem; padding: 2px 8px; border-radius: 20px;
+  background: var(--sky-lt); color: var(--sky); font-weight: 500;
+}
+
+.card-footer {
+  padding: .85rem 1.25rem 1.1rem;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.price-block .price-val {
+  font-family: var(--font-serif);
+  font-size: 1.15rem; font-weight: 500; color: var(--ink);
+}
+.price-block .price-label { font-size: .68rem; color: var(--muted); display: block; }
+
+.btn-row { display: flex; gap: 7px; }
+.btn {
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: .78rem; font-weight: 500;
+  cursor: pointer; border: none;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(.97); }
+.btn-outline {
+  background: var(--white);
+  border: 1.5px solid var(--border-2);
+  color: var(--ink-2);
+}
+.btn-outline:hover { background: var(--sage); border-color: var(--mint-mid); }
+.btn-primary {
+  background: var(--mint);
+  color: var(--white);
+  box-shadow: 0 3px 10px rgba(58,158,114,.25);
+}
+.btn-primary:hover {
+  background: #2f8560;
+  box-shadow: 0 5px 16px rgba(58,158,114,.35);
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  grid-column: 1/-1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 4rem 2rem; gap: 12px;
+  text-align: center;
+}
+.empty-icon { font-size: 2.5rem; margin-bottom: 4px; }
+.empty-title { font-family: var(--font-serif); font-size: 1.15rem; color: var(--ink); }
+.empty-sub { font-size: .85rem; color: var(--muted); font-weight: 300; }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(23,41,32,.45);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s var(--ease);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--white);
+  border-radius: 20px;
+  width: 100%; max-width: 520px;
+  box-shadow: 0 24px 64px rgba(23,41,32,.18);
+  overflow: hidden;
+  transform: scale(.94) translateY(12px);
+  transition: transform .3s var(--ease);
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+.modal-header {
+  padding: 1.4rem 1.5rem 1rem;
+  background: linear-gradient(160deg, var(--sage), var(--sky-lt));
+  display: flex; align-items: flex-start; gap: 14px;
+  position: relative;
+}
+.modal-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 32px; height: 32px;
+  border-radius: 50%; border: none;
+  background: rgba(255,255,255,.7);
+  cursor: pointer; font-size: .9rem; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, color .2s;
+}
+.modal-close:hover { background: var(--white); color: var(--ink); }
+
+.modal-avatar-ring {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--white); padding: 3px;
+  box-shadow: 0 3px 12px rgba(58,158,114,.18); flex-shrink: 0;
+}
+.modal-avatar-ring .avatar-initials { font-size: 1.4rem; }
+.modal-avatar-ring img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+
+.modal-title-block {}
+.modal-name { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.modal-qual { font-size: .8rem; color: var(--ink-2); font-weight: 300; }
+.modal-rating { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+
+.modal-body { padding: 1.25rem 1.5rem; }
+.modal-section-label {
+  font-size: .68rem; font-weight: 500; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: .5rem;
+}
+.modal-spec-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.1rem; }
+.modal-meta-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 1.1rem;
+}
+.modal-meta-item {
+  background: var(--sage);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.modal-meta-key { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; display: block; margin-bottom: 2px; }
+.modal-meta-val { font-size: .9rem; font-weight: 500; color: var(--ink); }
+
+.modal-footer {
+  padding: 1rem 1.5rem 1.4rem;
+  display: flex; gap: 10px;
+  border-top: 1px solid var(--border);
+}
+.modal-footer .btn { flex: 1; padding: 12px; font-size: .875rem; }
+
+/* ─── BOOK CONFIRM MODAL ─── */
+.confirm-icon { font-size: 2.5rem; text-align: center; margin-bottom: 8px; display: block; }
+.confirm-body { padding: 1.75rem 1.75rem 1.5rem; text-align: center; }
+.confirm-title { font-family: var(--font-serif); font-size: 1.2rem; color: var(--ink); margin-bottom: 6px; }
+.confirm-sub { font-size: .85rem; color: var(--muted); font-weight: 300; margin-bottom: 1.4rem; line-height: 1.7; }
+.confirm-detail {
+  background: var(--sage); border-radius: var(--radius-sm);
+  padding: 13px 16px; margin-bottom: 1.25rem; text-align: left;
+}
+.confirm-detail-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; font-size: .82rem; }
+.confirm-detail-row:last-child { margin-bottom: 0; }
+.confirm-detail-row span:first-child { color: var(--muted); }
+.confirm-detail-row span:last-child { font-weight: 500; color: var(--ink); }
+
+/* ─── MEDIA QUERIES ─── */
+@media (max-width: 1080px) {
+  #therapistGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 820px) {
+  :root { --sidebar-w: 100%; }
+  .page-body { flex-direction: column; padding: .75rem 1rem; }
+  .sidebar {
+    position: fixed; top: var(--header-h); left: 0; right: 0; bottom: 0;
+    z-index: 90; border-radius: 0; border: none;
+    transform: translateX(-110%);
+    max-height: none; height: calc(100vh - var(--header-h));
+    overflow-y: auto; width: 280px;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .filter-toggle-btn { display: flex; }
+  #therapistGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  #therapistGrid { grid-template-columns: 1fr; }
+  .header { padding: 0 1rem; gap: .75rem; }
+  .logo span:last-child { display: none; }
+  .card-meta-row { flex-wrap: wrap; gap: .5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header class="header">
+  <a href="#" class="logo">
+    <span class="logo-dot"></span>
+    <span>Just-Speak</span>
+  </a>
+
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search by name or specialization…" autocomplete="off">
+    <span class="search-icon">🔍</span>
+  </div>
+
+  <div class="header-right">
+    <div class="hdr-btn" title="Notifications">🔔</div>
+    <div class="profile-btn" title="Profile">JS</div>
+  </div>
+</header>
+
+<!-- MOBILE FILTER TOGGLE -->
+<button class="filter-toggle-btn" id="filterToggleBtn">
+  <span>⚙</span> Filters
+</button>
+
+<!-- ─── PAGE BODY ─── -->
+<div class="page-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <span class="sidebar-title">Filters</span>
+      <button class="clear-btn" id="clearFiltersBtn">Clear all</button>
+    </div>
+
+    <!-- Specialization -->
+    <div class="filter-section">
+      <span class="filter-label">Specialization</span>
+      <label class="check-item"><input type="checkbox" class="spec-check" value="Anxiety"> <span>Anxiety</span></label>
+      <label class="check-item"><input type="checkbox" class="spec-check" value="Depression"> <span>Depression</span></label>
+      <label class="check-item"><input type="checkbox" class="spec-check" value="Relationship Counseling"> <span>Relationship Counseling</span></label>
+      <label class="check-item"><input type="checkbox" class="spec-check" value="Stress Management"> <span>Stress Management</span></label>
+      <label class="check-item"><input type="checkbox" class="spec-check" value="Trauma & PTSD"> <span>Trauma &amp; PTSD</span></label>
+      <label class="check-item"><input type="checkbox" class="spec-check" value="Grief Counseling"> <span>Grief Counseling</span></label>
+    </div>
+
+    <!-- Language -->
+    <div class="filter-section">
+      <span class="filter-label">Language</span>
+      <select id="langFilter">
+        <option value="">All Languages</option>
+        <option value="English">English</option>
+        <option value="Spanish">Spanish</option>
+        <option value="French">French</option>
+        <option value="Hindi">Hindi</option>
+        <option value="Mandarin">Mandarin</option>
+        <option value="Arabic">Arabic</option>
+      </select>
+    </div>
+
+    <!-- Price -->
+    <div class="filter-section">
+      <span class="filter-label">Max price per session</span>
+      <div class="slider-wrap">
+        <input type="range" id="priceSlider" min="50" max="300" value="300" step="10">
+      </div>
+      <div class="slider-labels">
+        <span>$50</span>
+        <span class="slider-val" id="priceVal">Up to $300</span>
+      </div>
+    </div>
+
+    <!-- Rating -->
+    <div class="filter-section">
+      <span class="filter-label">Minimum Rating</span>
+      <label class="star-check check-item">
+        <input type="checkbox" id="ratingFilter">
+        <span class="stars-display">★★★★☆</span>
+        <span class="star-label">4+ stars only</span>
+      </label>
+    </div>
+
+    <!-- Availability -->
+    <div class="filter-section">
+      <span class="filter-label">Availability</span>
+      <div class="avail-group">
+        <div class="avail-pill active" data-avail="all">All</div>
+        <div class="avail-pill" data-avail="today">Today</div>
+        <div class="avail-pill" data-avail="online">Online Now</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="results-bar">
+      <p class="results-count"><strong id="countDisplay">0</strong> therapists found</p>
+      <select class="sort-select" id="sortSelect">
+        <option value="rating">Sort: Highest Rated</option>
+        <option value="price_asc">Sort: Price ↑</option>
+        <option value="price_desc">Sort: Price ↓</option>
+        <option value="experience">Sort: Most Experienced</option>
+      </select>
+    </div>
+    <div id="therapistGrid"></div>
+  </main>
+</div>
+
+<!-- ─── PROFILE MODAL ─── -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal" id="profileModalInner">
+    <div class="modal-header">
+      <div class="modal-avatar-ring" id="modalAvatar"></div>
+      <div class="modal-title-block">
+        <div class="modal-name" id="modalName"></div>
+        <div class="modal-qual" id="modalQual"></div>
+        <div class="modal-rating" id="modalRating"></div>
+      </div>
+      <button class="modal-close" id="profileModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-label">Specializations</div>
+      <div class="modal-spec-tags" id="modalSpecs"></div>
+      <div class="modal-section-label">Overview</div>
+      <div class="modal-meta-grid" id="modalMeta"></div>
+      <div class="modal-section-label">Languages</div>
+      <div class="modal-spec-tags" id="modalLangs"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="profileModalClose2">Close</button>
+      <button class="btn btn-primary" id="modalBookBtn">📅 Book Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── BOOKING CONFIRM MODAL ─── -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal" style="max-width:420px">
+    <div class="confirm-body">
+      <span class="confirm-icon">🎉</span>
+      <div class="confirm-title" id="confirmTitle">Session Requested!</div>
+      <p class="confirm-sub" id="confirmSub"></p>
+      <div class="confirm-detail" id="confirmDetail"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" style="flex:1;padding:12px" id="bookModalClose">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;padding:12px" id="bookConfirmBtn">✓ Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── DATA ─── */
+let therapists = [];
+
+async function fetchTherapists() {
+  try {
+    const res = await fetch('http://127.0.0.1:5000/api/therapists/');
+    if (!res.ok) throw new Error("Failed to fetch");
+    const data = await res.json();
+    
+    // Map backend data to frontend structure (mocking missing fields for UI layout)
+    therapists = data.map((t, index) => ({
+      id: t.id,
+      name: t.full_name,
+      qual: "Licensed " + (t.is_verified ? "Verified Therapist" : "Therapist"),
+      emoji: ["👩‍⚕️", "👨‍⚕️", "👩", "👨", "🧑‍⚕️"][index % 5],
+      specializations: ["Anxiety", "Depression", "Stress Management"], 
+      rating: (4.5 + (Math.random() * 0.5)).toFixed(1),
+      reviews: Math.floor(Math.random() * 100) + 20,
+      experience: Math.floor(Math.random() * 10) + 5,
+      price: t.hourly_rate || 100,
+      language: ["English"],
+      availability: index % 3 === 0 ? "online" : "today",
+      bio: t.bio || "A dedicated mental health professional ready to help you."
+    }));
+    
+    renderCards();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('therapistGrid').innerHTML = '<div class="empty-state">Error loading therapists. Is the backend running?</div>';
+  }
+}
+
+/* ─── STATE ─── */
+let state = {
+  search: '',
+  specs: [],
+  lang: '',
+  maxPrice: 300,
+  minRating: false,
+  avail: 'all',
+  sort: 'rating',
+  activeProfileId: null
+};
+
+/* ─── HELPERS ─── */
+function starsHTML(rating, size = '') {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= .5 ? 1 : 0;
+  const empty = 5 - full - half;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+
+function availLabel(a) {
+  if (a === 'online') return ['Online Now', 'online'];
+  if (a === 'today')  return ['Available Today', 'today'];
+  return ['Limited Slots', 'limited'];
+}
+
+function avatarHTML(t, size = 62) {
+  return `<div class="avatar-initials" style="width:${size}px;height:${size}px;font-size:${size*.35}px">${t.emoji}</div>`;
+}
+
+/* ─── RENDER ─── */
+function filtered() {
+  let list = [...therapists];
+
+  if (state.search.trim()) {
+    const q = state.search.toLowerCase();
+    list = list.filter(t =>
+      t.name.toLowerCase().includes(q) ||
+      t.specializations.some(s => s.toLowerCase().includes(q)) ||
+      t.qual.toLowerCase().includes(q)
+    );
+  }
+
+  if (state.specs.length) {
+    list = list.filter(t =>
+      state.specs.every(s => t.specializations.includes(s))
+    );
+  }
+
+  if (state.lang) {
+    list = list.filter(t => t.language.includes(state.lang));
+  }
+
+  list = list.filter(t => t.price <= state.maxPrice);
+
+  if (state.minRating) {
+    list = list.filter(t => t.rating >= 4);
+  }
+
+  if (state.avail !== 'all') {
+    list = list.filter(t => t.availability === state.avail);
+  }
+
+  list.sort((a, b) => {
+    if (state.sort === 'rating')      return b.rating - a.rating;
+    if (state.sort === 'price_asc')   return a.price - b.price;
+    if (state.sort === 'price_desc')  return b.price - a.price;
+    if (state.sort === 'experience')  return b.experience - a.experience;
+    return 0;
+  });
+
+  return list;
+}
+
+function renderCards() {
+  const list = filtered();
+  const grid = document.getElementById('therapistGrid');
+  document.getElementById('countDisplay').textContent = list.length;
+
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">🌿</span>
+        <div class="empty-title">No therapists match your filters</div>
+        <div class="empty-sub">Try adjusting your search or clearing some filters.</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map((t, i) => {
+    const [label, cls] = availLabel(t.availability);
+    return `
+    <div class="t-card" style="animation-delay:${i * 50}ms">
+      <div class="card-top">
+        <span class="avail-badge ${cls}">${label}</span>
+        <div class="avatar-ring">${avatarHTML(t)}</div>
+        <div class="top-meta">
+          <div class="t-name">${t.name}</div>
+          <div class="t-qual">${t.qual}</div>
+          <div class="rating-row">
+            <span class="stars">${'★'.repeat(Math.floor(t.rating))}</span>
+            <span class="rating-num">${t.rating}</span>
+            <span class="review-ct">(${t.reviews})</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="spec-tags">
+          ${t.specializations.map(s => `<span class="spec-tag">${s}</span>`).join('')}
+        </div>
+        <div class="card-meta-row">
+          <div class="meta-item"><span class="meta-icon">💼</span><span class="meta-val">${t.experience} yrs</span></div>
+          <div class="meta-item"><span class="meta-icon">💲</span><span class="meta-val">$${t.price}/session</span></div>
+        </div>
+        <div class="lang-row">
+          <span class="meta-icon">🌐</span>
+          ${t.language.map(l => `<span class="lang-tag">${l}</span>`).join('')}
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="price-block">
+          <span class="price-val">$${t.price}</span>
+          <span class="price-label">per session</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-outline" onclick="openProfile(${t.id})">View Profile</button>
+          <button class="btn btn-primary" onclick="openBook(${t.id})">📅 Book</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── PROFILE MODAL ─── */
+function openProfile(id) {
+  const t = therapists.find(x => x.id === id);
+  if (!t) return;
+  state.activeProfileId = id;
+
+  document.getElementById('modalAvatar').innerHTML = avatarHTML(t, 72);
+  document.getElementById('modalName').textContent = t.name;
+  document.getElementById('modalQual').textContent = t.qual;
+  document.getElementById('modalRating').innerHTML = `
+    <span class="stars">${'★'.repeat(Math.floor(t.rating))}</span>
+    <span style="font-size:.82rem;font-weight:500;color:var(--ink)">${t.rating}</span>
+    <span style="font-size:.75rem;color:var(--muted)">(${t.reviews} reviews)</span>`;
+
+  document.getElementById('modalSpecs').innerHTML =
+    t.specializations.map(s => `<span class="spec-tag" style="font-size:.75rem;padding:5px 12px">${s}</span>`).join('');
+
+  document.getElementById('modalMeta').innerHTML = `
+    <div class="modal-meta-item"><span class="modal-meta-key">Experience</span><span class="modal-meta-val">${t.experience} years</span></div>
+    <div class="modal-meta-item"><span class="modal-meta-key">Price</span><span class="modal-meta-val">$${t.price}/session</span></div>
+    <div class="modal-meta-item"><span class="modal-meta-key">Availability</span><span class="modal-meta-val">${availLabel(t.availability)[0]}</span></div>
+    <div class="modal-meta-item"><span class="modal-meta-key">Rating</span><span class="modal-meta-val">${t.rating} / 5.0</span></div>`;
+
+  document.getElementById('modalLangs').innerHTML =
+    t.language.map(l => `<span class="lang-tag" style="font-size:.75rem;padding:5px 12px">${l}</span>`).join('');
+
+  document.getElementById('profileModal').classList.add('open');
+}
+
+function closeProfile() {
+  document.getElementById('profileModal').classList.remove('open');
+}
+
+document.getElementById('profileModalClose').onclick  = closeProfile;
+document.getElementById('profileModalClose2').onclick = closeProfile;
+document.getElementById('profileModal').onclick = e => {
+  if (e.target === document.getElementById('profileModal')) closeProfile();
+};
+document.getElementById('modalBookBtn').onclick = () => {
+  closeProfile();
+  openBook(state.activeProfileId);
+};
+
+/* ─── BOOK MODAL ─── */
+function openBook(id) {
+  const t = therapists.find(x => x.id === id);
+  if (!t) return;
+  state.activeProfileId = id;
+
+  document.getElementById('confirmTitle').textContent = `Book a session with ${t.name}`;
+  document.getElementById('confirmSub').textContent =
+    `You're about to request a ${t.experience > 10 ? 'highly sought-after' : 'great'} session. Confirm to secure your spot.`;
+
+  const today = new Date();
+  const sessionDate = new Date(today.setDate(today.getDate() + (t.availability === 'today' ? 0 : 2)));
+  const dateStr = sessionDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+  document.getElementById('confirmDetail').innerHTML = `
+    <div class="confirm-detail-row"><span>Therapist</span><span>${t.name}</span></div>
+    <div class="confirm-detail-row"><span>Specialization</span><span>${t.specializations[0]}</span></div>
+    <div class="confirm-detail-row"><span>Proposed date</span><span>${dateStr}</span></div>
+    <div class="confirm-detail-row"><span>Duration</span><span>50 minutes</span></div>
+    <div class="confirm-detail-row"><span>Price</span><span>$${t.price}</span></div>`;
+
+  document.getElementById('bookModal').classList.add('open');
+}
+
+function closeBook() {
+  document.getElementById('bookModal').classList.remove('open');
+}
+
+document.getElementById('bookModalClose').onclick = closeBook;
+document.getElementById('bookModal').onclick = e => {
+  if (e.target === document.getElementById('bookModal')) closeBook();
+};
+document.getElementById('bookConfirmBtn').onclick = async () => {
+  const t = therapists.find(x => x.id === state.activeProfileId);
+  const btn = document.getElementById('bookConfirmBtn');
+  btn.textContent = 'Booking...';
+  btn.disabled = true;
+
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+     alert("You must be logged in as a Patient to book a session!");
+     window.location.href = 'signin2.html';
+     return;
+  }
+
+  // Create start and end times (Default 1 hour starting tomorrow at 10 AM)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(10, 0, 0, 0);
+  const start_time = tomorrow.toISOString();
+  
+  const end = new Date(tomorrow);
+  end.setHours(11, 0, 0, 0);
+  const end_time = end.toISOString();
+
+  try {
+    const res = await fetch('http://127.0.0.1:5000/api/appointments/book', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+         therapist_id: t.id,
+         start_time: start_time,
+         end_time: end_time
+      })
+    });
+    
+    if (res.ok) {
+        closeBook();
+        alert(`✅ Session confirmed with ${t.name}!\n\nYour appointment is scheduled for tomorrow at 10:00 AM.`);
+    } else {
+        const errData = await res.json();
+        alert(`Failed to book session: ${errData.message}`);
+    }
+  } catch (e) {
+    alert("An error occurred while communicating with the server.");
+    console.error(e);
+  } finally {
+    btn.textContent = '✓ Confirm';
+    btn.disabled = false;
+  }
+};
+
+/* ─── FILTER EVENTS ─── */
+document.getElementById('searchInput').addEventListener('input', e => {
+  state.search = e.target.value;
+  renderCards();
+});
+
+document.querySelectorAll('.spec-check').forEach(cb => {
+  cb.addEventListener('change', () => {
+    state.specs = [...document.querySelectorAll('.spec-check:checked')].map(el => el.value);
+    renderCards();
+  });
+});
+
+document.getElementById('langFilter').addEventListener('change', e => {
+  state.lang = e.target.value;
+  renderCards();
+});
+
+const priceSlider = document.getElementById('priceSlider');
+priceSlider.addEventListener('input', e => {
+  state.maxPrice = +e.target.value;
+  document.getElementById('priceVal').textContent = `Up to $${e.target.value}`;
+  const pct = ((e.target.value - 50) / (300 - 50)) * 100;
+  priceSlider.style.background = `linear-gradient(to right, var(--mint) 0%, var(--mint) ${pct}%, #cde4d9 ${pct}%)`;
+  renderCards();
+});
+
+document.getElementById('ratingFilter').addEventListener('change', e => {
+  state.minRating = e.target.checked;
+  renderCards();
+});
+
+document.querySelectorAll('.avail-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.avail-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    state.avail = pill.dataset.avail;
+    renderCards();
+  });
+});
+
+document.getElementById('sortSelect').addEventListener('change', e => {
+  state.sort = e.target.value;
+  renderCards();
+});
+
+document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+  document.querySelectorAll('.spec-check').forEach(cb => cb.checked = false);
+  document.getElementById('langFilter').value = '';
+  document.getElementById('priceSlider').value = 300;
+  document.getElementById('priceVal').textContent = 'Up to $300';
+  priceSlider.style.background = 'linear-gradient(to right, var(--mint) 0%, var(--mint) 100%, #cde4d9 100%)';
+  document.getElementById('ratingFilter').checked = false;
+  document.querySelectorAll('.avail-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-avail="all"]').classList.add('active');
+  document.getElementById('searchInput').value = '';
+  state = { search:'', specs:[], lang:'', maxPrice:300, minRating:false, avail:'all', sort:state.sort, activeProfileId:null };
+  renderCards();
+});
+
+/* ─── MOBILE SIDEBAR ─── */
+document.getElementById('filterToggleBtn').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+/* ─── INIT ─── */
+fetchTherapists();
+</script>
+</body>
+</html>
